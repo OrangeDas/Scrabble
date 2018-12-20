@@ -1,0 +1,162 @@
+﻿**************************
+Fichier de correction TP4
+**************************
+
+Nous avons utilisé la solution publiée du TP3 (oui, non, partiellement): Non, nous avions eu 100% au tp3
+
+Nous pensons que notre TP4 est un bon candidat au prix Pierre-Ardoin (oui, non): Oui malgré que le redimmensionnement
+n'a pas été implémenté.
+
+
+Prénom et Nom 1: Isabelle Eysseric
+Prénom et nom 2: Roger Gaudreault
+
+Numéro de dossier (NI) 1: 111189609
+Numéro de dossier (NI) 2: 111166968
+
+Temps de réalisation 1 : 60h
+Temps de réalisation 2 : 75h
+
+
+Fonctionnalités obligatoires (70%)
+-----------------------------------
+
+/6 : Le plateau est bien dessiné
+     Commentaires :
+
+/6 : Le joueur actif voit son chevalet
+     Commentaires :
+
+/6 : Les jetons peuvent être déplacés du chevalet vers le plateau
+     Commentaires :
+
+/6 : Le jeton sélectionné est facilement identifiable
+     Commentaires :
+
+/6 : Le tour des joueurs est alterné correctement
+     Commentaires :
+
+/4 : Les déplacements invalides ne sont pas acceptés
+     Commentaires :	
+
+/4 : On peut changer d'idée de jeton en le redéposant à une place vide du chevalet
+     Commentaires : (cliquer sur le jeton à reprendre, double clic sur plateau rappelle tous les jetons au chevalet)
+
+/4 : La fin de la partie est détectée et affichée
+     Commentaires :
+
+/4 : On peut sauvegarder une partie via un bouton
+     Commentaires :
+
+/4 : On peut charger une partie via un bouton
+     Commentaires :
+
+/4 : On peut démarrer une nouvelle partie
+     Commentaires :
+
+/4 :Les informations de partie sont affichées (points des joueurs et nom du joueur courant)
+     Commentaires :
+
+/4 : Qualité des messages d'erreur donnés à l'utilisateur
+     Commentaires :
+
+/4 : Utilisation de la gestion des exceptions
+     Commentaires :
+
+/4 : Qualité du code
+     Commentaires :
+
+Total: /70
+
+
+Fonctionnalités facultatives (30% max)
+
+INDIQUEZ PAR OUI/NON SI LA FONCTIONNALITÉ EST IMPLANTÉE
+-------------------------------------------------------
+
+
+IMPLANTÉE: 
+/5 : Option de lire les règlements du jeu
+     Commentaires : OUI en page d'Accueil
+
+IMPLANTÉE:
+/5 : Permettre de choisir la langue du jeu
+     Commentaires : Oui 15 langues
+
+IMPLANTÉE:
+/15 :  Supporter au moins 15 langues
+     Commentaires : Oui menu déroulant
+
+IMPLANTÉE: Oui, bouton "Mots du plateau"
+/5 : Affichage de la liste des mots sur le plateau
+     Commentaires : Oui
+
+IMPLANTÉE:
+/5 : Permettre d'annuler le dernier mouvement
+     Commentaires : Oui, reprise de jetons sur le plateau
+
+IMPLANTÉE:
+/5 :  Sauvegarde et possibilité de "revoir" une partie enregistrée
+     Commentaires :	Non
+
+IMPLANTÉE:
+/10 :  Jouer contre l'ordinateur
+     Commentaires : Non
+
+IMPLANTÉE:
+/5 : Permettre de changer le thème (couleurs, style, etc.)
+     Commentaires : Non
+
+IMPLANTÉE:
+/5 : "Drag-and-drop" de jetons
+     Commentaires : Non
+
+IMPLANTÉE:
+/10 : Afficher un compteur de temps de jeu pour chaque joueur
+     Commentaires : Non
+
+IMPLANTÉE:
+/10 : Assister le joueur en lui proposant des mots
+     Commentaires : Non
+
+IMPLANTÉE:
+/20 : Donner une dimension 3D à votre jeu
+     Commentaires : Non
+
+IMPLANTÉE:
+/5 : Demander si on veut sauvegarder avant de quitter/charger
+     Commentaires : On ne peut que charger de la page d'accueil donc non, mais à la fermeture de la fenetre principale
+     la question est posée pour sauvegarder, donc oui/non
+
+IMPLANTÉE:
+/5 : Fenêtre de bienvenue, avec explications du jeu et sélection d'options
+     Commentaires : Oui
+
+IMPLANTÉE:
+/30 : Implémenter toutes les règles offcielles d'une version du scrabble
+     Source: [À PRÉCISER]
+     Commentaires : Non
+
+IMPLANTÉE:
+/30 : Jouer contre l'ordinateur en implémentant une intelligence artificielle
+     (l'ordinateur intelligent devra toujours jouer les meilleurs coups et gagner chaque partie)
+     Commentaires : Non
+
+
+
+Total: /30
+
+
+
+Pénalités pour non-respect des consignes
+----------------------------------------
+
+
+
+Autres commentaires du correcteur
+---------------------------------
+no. du correcteur:
+
+
+Total: /100
+
