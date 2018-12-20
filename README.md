@@ -1,5 +1,4 @@
-# Scrabble
-Game Scrabble
+# Jeu de Scrabble
 <br>
 <p><a href=""><img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Scrabble_2015.jpg"alt="Scrabble, image de Wikipedia"></a><br>
 
@@ -15,7 +14,7 @@ Game Scrabble
 <br>
 ### DESCRIPTION:<br>
 ================
-<p> Le Scrabble est un jeu de mots, où il faut former le plus possible de mots sur un plateau avec des cases de valeurs différentes. Les mots inscris dans des cases spéciales voient leur valeur doubler ou tripler. Le gagnant est celui qui marque le plus de points.</p>
+<p> Le Scrabble est un jeu de société basé sur les mots. Il faut former le plus possible de mots sur un plateau avec des cases de valeurs différentes. Les mots inscris dans des cases spéciales voient leur valeur doubler ou tripler. Le gagnant est celui qui marque le plus de points.</p>
 <br>
 ### UTILISATION:<br>
 ===============
