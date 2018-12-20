@@ -1,7 +1,7 @@
 # Scrabble
 Game Scrabble
 <br>
-<a href=""><img src="https://commons.wikimedia.org/wiki/File:Scra6.jpg#/media/File:Scra6.jpg"alt="Jeu de Scrabble, image de Wikipedia"></a>
+<p><a href=""><img src="https://commons.wikimedia.org/wiki/File:Scra6.jpg#/media/File:Scra6.jpg"alt="Jeu de Scrabble, image de Wikipedia"></a>
 <br>
 ### AUTEURS:<br>
 ============
