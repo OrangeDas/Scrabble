@@ -27,7 +27,7 @@
   <br>
 ### RESSOURCES, DOCUMENTATION:<br>
 =============================
-<p>Pour plus d'informations sur le jeu Scrabble, visitez le <a href="https://fr.wikipedia.org/wiki/Scrabble"> site de Wikipedia</a>.</p>
+<p>Pour plus d'informations sur le jeu Scrabble, visitez le <a href="https://fr.wikipedia.org/wiki/Scrabble"> site </a> de Wikipedia.</p>
 <br>
 ### MÉTHODE DE RAPPORT DE BUG:<br>
 =============================
