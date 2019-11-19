@@ -1,43 +1,43 @@
-# Jeu de Scrabble
+# Scrabble Game
 <br>
-<p><a href=""><img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Scrabble_2015.jpg"alt="Scrabble, image de Wikipedia"></a><br>
+<p><a href=""><img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Scrabble_2015.jpg"alt="Scrabble, image of Wikipedia"></a><br>
 
 <br>
-### AUTEURS:<br>
+### AUTHORS:<br>
 ============
 <p> Isabelle EYSSERIC</p>
 <p>Roger  GAUDREAULT </p>
 <br>
-### ETAT DU PROJET:<br>
+### PROJECT STATUS:<br>
 ==================
-<p>Version initiale</p>
+<p>Initial version</p>
 <br>
 ### DESCRIPTION:<br>
 ================
-<p> Le Scrabble est un jeu de société basé sur les mots. Il faut former le plus possible de mots sur un plateau avec des cases de valeurs différentes. Les mots inscris dans des cases spéciales voient leur valeur doubler ou tripler. Le gagnant est celui qui marque le plus de points.</p>
+<p> Scrabble is a board game based on words. You must train as many words as possible on a board with boxes of different values. Words in special boxes are doubled or tripled. The winner is the one who scores the most points.</p>
 <br>
-### UTILISATION:<br>
+### USE:<br>
 ===============
-<p>Le  programme est muni de trois dossiers</p>
+<p>The program has three folders.</p>
 <ol>
-  <li>Fichier Code: <code>joueur.py</code>, <code>plateau.py</code> et <code>scrabble.py</code>.</li>
-<li>Fichier Dictionnaire: un fichier <code>.txt</code> pour chaque langue. Il y a 15 langues au total.</li>
-<li>Fichier Images: les images nécessaires au jeu.</li>
+  <li>File Code: <code>joueur.py</code>, <code>plateau.py</code> and <code>scrabble.py</code>.</li>
+<li>Dictionary File: a <code>.txt</code> file for each language. There are 15 languages in total.</li>
+<li>File Images: the images needed for the game.</li>
   </ol>
   <br>
-### RESSOURCES, DOCUMENTATION:<br>
+### RESOURCES, DOCUMENTATION:<br>
 =============================
-<p>Pour plus d'informations sur le jeu Scrabble, visitez le <a href="https://fr.wikipedia.org/wiki/Scrabble"> site </a> de Wikipedia.</p>
+<p>For more information on the game Scrabble, visit the <a href="https://fr.wikipedia.org/wiki/Scrabble"> site </a> Wikipedia site.</p>
 <br>
-### MÉTHODE DE RAPPORT DE BUG:<br>
+### BUG REPORT METHOD:<br>
 =============================
-<p>(À déterminer)</p>
+<p>(To be determined)</p>
 <br>
 ### CONTRIBUTION:<br>
 ================
-<p>(À déterminer)</p>
+<p>(To be determined)</p>
 <br>
-### Licence(s), copyright<br>
+### LICENSE(S), COPYROGHT<br>
 =========================
-<p>(À déterminer)</p>
+<p>(To be determined)</p>
 <br>
