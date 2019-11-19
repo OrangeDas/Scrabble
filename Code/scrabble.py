@@ -2,45 +2,34 @@ import pickle
 from random import randint, shuffle
 from joueur import Joueur
 from plateau import Plateau, Jeton, Chevalet
-from tkinter import Tk, Toplevel, filedialog, NSEW, N, E, W, Frame, Label, Entry, PhotoImage, \
-    Radiobutton, IntVar, StringVar, Button, messagebox
+from tkinter import Tk, Toplevel, filedialog, NSEW, N, E, W, Frame, Label, Entry, PhotoImage, Radiobutton, IntVar, StringVar, Button, messagebox
 from tkinter.ttk import Combobox
 
 
 class jetons_sur_plateau(Exception):
     def __init__(self, texte_action):
-        messagebox.showinfo(title="Minute papillon...",
-                            message="Au moins un jeton est sur le plateau, veuillez le(s) reprendre avant {}".format(
-                                texte_action))
+        messagebox.showinfo(title="Wait a minute...", message="At least one tocken is on the board, please resume before {}".format(texte_action) )
 
 
 class mots_non_valides(Exception):
     def __init__(self):
-        messagebox.showinfo(title="OUPSSS  Mauvais coup !",
-                            message="Au moins l'un des mots formés est absent du dictionnaire.\n\nVeuillez réessayer.")
+        messagebox.showinfo(title="OUPSSS Bad shot !", message="At least one of the words formed is missing from the dictionary.\n\nTry again")
 
 
 class positions_non_valides(Exception):
     def __init__(self, nombre_jeton):
         if nombre_jeton == 1:
-            messagebox.showinfo(title="Faudra recommencer...",
-                                message="Votre lettre est mal positionnée. ")
+            messagebox.showinfo(title="Will have to start again...", message="Your letter is wrongly positioned. ")
         else:
-            messagebox.showinfo(title="Faudra recommencer...",
-                                message="Vos lettres sont mal positionnées. "
-                                        "Elles doivent être sur une seule ligne ou colonne et "
-                                        "ne former qu'une seul mot sur cette ligne ou colonne."
-                                        "Le premier mot doit couvrir l'étoile centrale.")
+            messagebox.showinfo(title="Will have to start again...", message="Your letters are badly positioned. They must be on a single line or column and form only one word on this line or column. The first word must cover the central star.")
 
 
 class Sauvegarde():
     """
-    Classe comportant tout les éléments d'une partie
-    pour la sauvegarder et le charger par la suite afin de reprendre une partie entammée.
+    Class containing all the elements of a game to save it and load it later to resume a game.
     """
 
-    def __init__(self, nb_joueurs, nb_joueurs_restants, cases, jetons_libres, joueurs, joueur_actif, mots_au_plateau,
-                 langue):
+    def __init__(self, nb_joueurs, nb_joueurs_restants, cases, jetons_libres, joueurs, joueur_actif, mots_au_plateau, langue):
         self.nb_joueurs = nb_joueurs  # ok
         self.nb_joueurs_restants = nb_joueurs_restants  # ok
         self.cases = cases  # ok
@@ -53,51 +42,44 @@ class Sauvegarde():
 
 class Scrabble(Tk):
     """
-    Classe Scrabble qui implémente aussi une partie de la logique de jeu.
-
-    Les attributs d'un scrabble sont:
-    - dictionnaire: set, contient tous les mots qui peuvent être joués sur dans cette partie.
-    En gros pour savoir si un mot est permis on va regarder dans le dictionnaire.
-    - plateau: Plateau, un objet de la classe Plateau on y place des jetons et il nous dit le nombre de points gagnés.
-    - jetons_libres: Jeton list, la liste de tous les jetons dans le sac, c'est là que chaque joueur
-                    peut prendre des jetons quand il en a besoin.
-    - joueurs: Joueur list,  L'ensemble des joueurs de la partie.
-    - joueur_actif: Joueur, le joueur qui est entrain de jouer le tour en cours. Si aucun joueur alors None.
+    Scrabble class that also implements part of the game logic.
+    The attributes of a scrabble are:
+    - dictionnaire: set, contains all the words that can be played on in this part.
+    Basically to know if a word is allowed we will look in the dictionary.
+    - plateau: The board is an item of the Trap class, where tackens are placed and it tells us the number of points won.
+    - jetons_libres: Token list, the list of all the tockens in the bag, this is where each player can take tokens when he needs them.
+    - joueurs: Player list, All players of the game.
+    - joueur_actif: Player, the player who is playing the current turn. If no player then None.
     """
 
+    
     def __init__(self, nb_joueurs, langue):
-        """ *** Vous n'avez pas à coder cette méthode ***
-        Étant donnés un nombre de joueurs et une langue. Le constructeur crée une partie de scrabble.
-        Pour une nouvelle partie de scrabble,
-        - un nouvel objet Plateau est créé;
-        - La liste des joueurs est créée et chaque joueur porte automatiquement le nom Joueur 1, Joueur 2, ...
-        Joueur n où n est le nombre de joueurs;
-        - Le joueur_actif est None.
-        :param nb_joueurs: int, nombre de joueurs de la partie au minimun 2 au maximum 4.
-        :param langue: str, FR pour la langue française, et EN pour la langue anglaise. Dépendamment de la langue,
-        vous devez ouvrir, lire, charger en mémoire le fichier "dictionnaire_francais.txt" ou "dictionnaire_anglais.txt"
-         ensuite il faudra ensuite extraire les mots contenus pour construire un set avec le mot clé set.
-        Aussi, grâce à la langue vous devez être capable de créer tous les jetons de départ et les mettre
-        dans jetons_libres.
-        Pour savoir combien de jetons créés pour chaque langue vous pouvez regarder à l'adresse:
+        """ 
+        Given a number of players and a language. The builder creates a scrabble game.
+        For a new scrabble game,
+        - a new board object is created;
+        - The list of players is created and each player is automatically named  Player 1, Player 2, ...
+        JPlayer n where n is the number of players;
+        - The joueur_actif is None.
+        :param nb_joueurs: int, number of players in the game at least 2 at most 4.
+        :param langue: str, FR for the French language, and EN for the English language. Depending on the language,
+        you must open, read, load in memory the file "dictionnaire_francais.txt" or "dictionnaire_anglais.txt"
+        Then it will be necessary to extract the words contained to build a set with the set keyword.
+        Also, thanks to the language you must be able to create all the starting chips and put them in jetons_libres.
+        To find out how many tokens created for each language you can look at:
         https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
-        *** Dans notre scrabble, nous n'utiliserons pas les jetons jokers qui ne contienent aucune lettre donc ne les
-         incluez pas dans les jetons libres ***
-        :exception: Levez une exception avec assert si la langue n'est ni fr, FR, en, ou EN ou si nb_joueur < 2 ou > 4.
+        *** In our scrabble, we will not use wildcards that do not contain any letters, so do not include them in free tokens ***
+        :exception: Raise an exception with assert if the language is not fr, FR, en, or EN or if nb_joueur < 2 or > 4.
         """
-
-
-
 
         super().__init__( )
 
         if partie_a_charger == "":
-            self.joueurs = [Joueur(("Joueur {}".format(i + 1))) for i in range(nb_joueurs)]
+            self.joueurs = [Joueur(("Player {}".format(i + 1))) for i in range(nb_joueurs)]
             self.nb_joueurs = nb_joueurs
             self.nb_joueurs_restants = self.nb_joueurs
             self.mots_au_plateau = []
             self.langue = langue
-
         else:
             self.donnees_de_partie = self.charger_partie(partie_a_charger)
             self.joueurs = self.donnees_de_partie.joueurs
@@ -107,9 +89,10 @@ class Scrabble(Tk):
             self.langue = self.donnees_de_partie.langue
 
         global data
+        
         # DICTIONAIRE FRANCAIS
         if self.langue.upper() == 'FR':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('E', 15, 1), ('A', 9, 1), ('I', 8, 1), ('N', 6, 1), ('O', 6, 1),
                     ('R', 6, 1), ('S', 6, 1), ('T', 6, 1), ('U', 6, 1), ('L', 5, 1),
                     ('D', 3, 2), ('M', 3, 2), ('G', 2, 2), ('B', 2, 3), ('C', 2, 3),
@@ -117,9 +100,10 @@ class Scrabble(Tk):
                     ('Q', 1, 8), ('K', 1, 10), ('W', 1, 10), ('X', 1, 10), ('Y', 1, 10),
                     ('Z', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_francais.txt'
+            
         # DICTIONAIRE ANGLAIS
         elif self.langue.upper() == 'AN':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('E', 12, 1), ('A', 9, 1), ('I', 9, 1), ('N', 6, 1), ('O', 8, 1),
                     ('R', 6, 1), ('S', 4, 1), ('T', 6, 1), ('U', 4, 1), ('L', 4, 1),
                     ('D', 4, 2), ('M', 2, 3), ('G', 3, 2), ('B', 2, 3), ('C', 2, 3),
@@ -127,9 +111,10 @@ class Scrabble(Tk):
                     ('Q', 1, 10), ('K', 1, 5), ('W', 2, 4), ('X', 1, 8), ('Y', 2, 4),
                     ('Z', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_anglais.txt'
+            
         # DICTIONAIRE ESPAGNOL
         elif self.langue.upper() == 'ES':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('A', 12, 1), ('E', 12, 1), ('O', 9, 1), ('I', 6, 1), ('S', 6, 1),
                     ('N', 5, 1), ('R', 5, 1), ('U', 5, 1), ('L', 4, 1), ('T', 4, 1),
                     ('D', 5, 2), ('G', 2, 2), ('C', 4, 3), ('B', 2, 3), ('M', 2, 3),
@@ -137,18 +122,20 @@ class Scrabble(Tk):
                     ('CH', 1, 5), ('Q', 1, 5), ('J', 1, 8), ('LL', 1, 8), ('Ñ', 1, 8),
                     ('RR', 1, 8), ('X', 1, 8), ('Z', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_espagnol.txt'
+            
         # DICTIONAIRE ITALIEN
         elif self.langue.upper() == 'IT':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('O', 15, 1), ('A', 14, 1), ('I', 12, 1), ('E', 11, 1), ('C', 6, 2),
                     ('R', 6, 2), ('S', 6, 2), ('T', 6, 2), ('L', 5, 3), ('M', 5, 3),
                     ('N', 5, 3), ('U', 5, 3), ('B', 3, 5), ('D', 3, 5), ('F', 3, 5),
                     ('P', 3, 5), ('V', 3, 5), ('G', 2, 8), ('H', 2, 8), ('Z', 2, 8),
                     ('Q', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_italien.txt'
+            
         # DICTIONAIRE NORVEGIEN
         elif self.langue.upper() == 'NO':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('E', 9, 1), ('A', 7, 1), ('N', 6, 1), ('R', 6, 1), ('S', 6, 1),
                     ('T', 6, 1), ('D', 5, 1), ('I', 5, 1), ('L', 5, 1), ('F', 4, 2),
                     ('G', 4, 2), ('K', 4, 2), ('O', 4, 2), ('M', 3, 2), ('H', 3, 3),
@@ -156,9 +143,10 @@ class Scrabble(Tk):
                     ('Å', 2, 4), ('Ø', 2, 5), ('Y', 1, 6), ('Æ', 1, 6), ('W', 1, 8),
                     ('C', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_norvegien.txt'
+            
         # DICTIONAIRE NÉERLANDAIS
         elif self.langue.upper() == 'NE':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('E', 18, 1), ('N', 10, 1), ('A', 6, 1), ('O', 6, 1), ('I', 4, 1),
                     ('D', 5, 2), ('R', 5, 2), ('T', 5, 2), ('S', 4, 2), ('G', 3, 3),
                     ('K', 3, 3), ('L', 3, 3), ('M', 3, 3), ('B', 2, 3), ('P', 2, 3),
@@ -166,9 +154,10 @@ class Scrabble(Tk):
                     ('IJ', 2, 4), ('F', 1, 4), ('C', 2, 5), ('W', 2, 5), ('X', 1, 8),
                     ('Y', 1, 8), ('Q', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_neerlandais.txt'
+            
         # DICTIONAIRE DANOIS
         elif self.langue.upper() == 'DA':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('E', 9, 1), ('A', 7, 1), ('N', 6, 1), ('R', 6, 1), ('D', 5, 2),
                     ('L', 5, 2), ('O', 5, 2), ('S', 5, 2), ('T', 5, 2), ('B', 4, 3),
                     ('I', 4, 3), ('K', 4, 3), ('F', 3, 3), ('G', 3, 3), ('M', 3, 3),
@@ -178,7 +167,7 @@ class Scrabble(Tk):
             nom_fichier_dictionnaire = 'dictionnaire_danois.txt'
         # DICTIONNAIRE BULGARE
         elif self.langue.upper() == 'BU':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('A', 9, 1), ('O', 9, 1), ('E', 8, 1), ('И', 8, 1), ('T', 5, 1),
                     ('H', 4, 1), ('П', 4, 1), ('P', 4, 1), ('C', 4, 1), ('B', 4, 2),
                     ('M', 4, 2), ('Б', 3, 2), ('Д', 3, 2), ('К', 3, 2), ('Л', 3, 2),
@@ -186,9 +175,10 @@ class Scrabble(Tk):
                     ('Ч', 2, 5), ('Я', 2, 5), ('Й', 1, 5), ('X', 1, 5), ('Ц', 1, 8),
                     ('Ш', 1, 8), ('Ю', 1, 8), ('Ф', 1, 10), ('Щ', 1, 10), ('Ь', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_bulgare.txt'
+            
         # DICTIONNAIRE ESTONIEN
         elif self.langue.upper() == 'ET':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('A', 10, 1), ('E', 9, 1), ('I', 9, 1), ('S', 8, 1), ('T', 7, 1),
                     ('K', 5, 1), ('L', 5, 1), ('O', 5, 1), ('U', 5, 1), ('D', 4, 2),
                     ('M', 4, 2), ('N', 4, 2), ('R', 2, 2), ('G', 2, 3), ('V', 2, 3),
@@ -205,9 +195,10 @@ class Scrabble(Tk):
                     ('Γ', 2, 4), ('Δ', 2, 4), ('B', 1, 8), ('Φ', 1, 8), ('X', 1, 8),
                     ('Z', 1, 10), ('Θ', 1, 10), ('Ξ', 1, 10), ('Ψ', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_grec.txt'
+            
         # DICTIONNAIRE CROATE
         elif self.langue.upper() == 'CR':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('A', 11, 1), ('I', 10, 1), ('E', 9, 1), ('O', 9, 1), ('N', 6, 1),
                     ('R', 5, 1), ('S', 5, 1), ('T', 5, 1), ('J', 4, 1), ('U', 4, 1),
                     ('K', 3, 2), ('M', 3, 2), ('P', 3, 2), ('V', 3, 2), ('D', 3, 3),
@@ -215,9 +206,10 @@ class Scrabble(Tk):
                     ('C', 1, 4), ('H', 1, 4), ('LJ', 1, 4), ('NJ', 1, 4), ('Š', 1, 4),
                     ('Ž', 1, 4), ('Ć', 1, 5), ('F', 1, 8), ('DŽ', 1, 10), ('Đ', 1, 10)]
             nom_fichier_dictionnaire = 'dictionnaire_croate.txt'
+            
         # DICTIONNAIRE HONGROIS
         elif self.langue.upper() == 'HO':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('A', 6, 1), ('E', 6, 1), ('K', 6, 1), ('T', 5, 1), ('Á', 4, 1),
                     ('L', 4, 1), ('N', 4, 1), ('R', 4, 1), ('I', 3, 1), ('M', 3, 1),
                     ('O', 3, 1), ('S', 3, 1), ('B', 2, 3), ('D', 2, 3), ('G', 2, 3),
@@ -227,17 +219,19 @@ class Scrabble(Tk):
                     ('NY', 1, 5), ('CS', 1, 7), ('Ő', 1, 7), ('Ú', 1, 7), ('Ű', 1, 7),
                     ('LY', 1, 8), ('ZS', 1, 8), ('TY', 1, 10), ]
             nom_fichier_dictionnaire = 'dictionnaire_hongrois.txt'
+            
         # DICTIONNAIRE LATIN
         elif self.langue.upper() == 'LA':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('E', 12, 1), ('A', 9, 1), ('I', 9, 1), ('V', 9, 2), ('S', 8, 1),
                     ('T', 8, 1), ('R', 7, 1), ('O', 5, 1), ('C', 4, 2), ('M', 4, 2),
                     ('N', 4, 2), ('D', 3, 2), ('L', 3, 2), ('Q', 3, 3), ('B', 2, 4),
                     ('G', 2, 4), ('P', 2, 4), ('X', 2, 4), ('F', 1, 8), ('H', 1, 8)]
             nom_fichier_dictionnaire = 'dictionnaire_latin.txt'
+            
         # DICTIONNAIRE ISLANDAIS
         elif self.langue.upper() == 'IS':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('E', 10, 1), ('I', 8, 1), ('N', 8, 1), ('R', 7, 1), ('E', 6, 1),
                     ('S', 6, 1), ('U', 6, 1), ('T', 5, 1), ('Ð', 5, 2), ('G', 4, 2),
                     ('K', 3, 2), ('L', 3, 2), ('M', 3, 2), ('F', 3, 3), ('O', 3, 3),
@@ -248,7 +242,7 @@ class Scrabble(Tk):
             nom_fichier_dictionnaire = 'dictionnaire_islandais.txt'
         # DICTIONAIRE PORTUGAIS ok
         elif langue.upper() == 'PO':
-            # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
+            # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
             data = [('A', 14, 1), ('I', 10, 1), ('O', 10, 1), ('S', 8, 1), ('U', 7, 1),
                     ('M', 6, 1), ('R', 6, 1), ('E', 5, 1), ('T', 5, 1), ('C', 4, 2),
                     ('P', 4, 2), ('D', 5, 2), ('L', 5, 2), ('N', 4, 3), ('B', 3, 3),
@@ -257,8 +251,7 @@ class Scrabble(Tk):
             nom_fichier_dictionnaire = 'dictionnaire_portugais.txt'
 
         if partie_a_charger == "":
-            self.jetons_libres = [Jeton(lettre, valeur) for lettre, occurences, valeur in data for i in
-                                  range(occurences)]
+            self.jetons_libres = [Jeton(lettre, valeur) for lettre, occurences, valeur in data for i in range(occurences)]
         else:
             self.jetons_libres = self.donnees_de_partie.jetons_libres
             self.liste_codes_position_a_valider = []
@@ -267,21 +260,19 @@ class Scrabble(Tk):
             self.dictionnaire = set([x[:-1].upper() for x in f.readlines() if len(x[:-1]) > 1])
 
         self.position_jeton_selectionne = None
-
-        self.title("Scrabble TP4 Isabelle Eysseric et Roger Gaudreault")
+        self.title("Scrabble: Isabelle Eysseric and Roger Gaudreault")
         self.geometry("1x1+0+0")
 
         if partie_a_charger == "":
-            # Form pour avoir le nom et le choix d'image du joueur avant de dessiner l'interface
+            # Form to have the name and choice of image of the player before drawing the interface
             self.form_joueurs = Toplevel(self)
-            self.form_joueurs.title("Qui veut jouer ?")
+            self.form_joueurs.title("Who wants to play ?")
             self.form_joueurs.configure(bg="#445569")
             self.form_joueurs.geometry("500x700+200+0")
 
             fr_intro_joueur = Frame(self.form_joueurs, bg="#445569")
             fr_intro_joueur.grid(row=0, column=0)
-            label_intro_joueur = Label(fr_intro_joueur, text="Chaque joueur doit entrer son nom",
-                                       padx=50, pady=50, font=("Impact", 20), bg="#445569", foreground='white')
+            label_intro_joueur = Label(fr_intro_joueur, text="Each player must enter their name", padx=50, pady=50, font=("Impact", 20), bg="#445569", foreground='white')
             label_intro_joueur.grid(row=0, column=0)
 
             image_equipe = Frame(self.form_joueurs,  bg = "#445569")
@@ -292,43 +283,33 @@ class Scrabble(Tk):
 
             fr_entry_joueur = Frame(self.form_joueurs, bg="#445569")
             fr_entry_joueur.grid(row=2, column=0)
-            Label(fr_entry_joueur, text="Joueur 1 :", pady=10, font=("Helvetica", 15), bg='#445569',
-                  foreground='white').grid(row=0, column=0, sticky=W)
-            Label(fr_entry_joueur, text="Joueur 2 :", pady=10, font=("Helvetica", 15), bg='#445569',
-                  foreground='white').grid(row=1, column=0, sticky=W)
+            Label(fr_entry_joueur, text="Joueur 1 :", pady=10, font=("Helvetica", 15), bg='#445569', foreground='white').grid(row=0, column=0, sticky=W)
+            Label(fr_entry_joueur, text="Joueur 2 :", pady=10, font=("Helvetica", 15), bg='#445569', foreground='white').grid(row=1, column=0, sticky=W)
+            
             self.form_joueurs.jo1 = StringVar()
             self.form_joueurs.jo2 = StringVar()
+            self.form_joueurs.jo1.set("Player 1")
+            self.form_joueurs.jo2.set("Player 2")
 
-            self.form_joueurs.jo1.set("Joueur 1")
-            self.form_joueurs.jo2.set("Joueur 2")
-
-            Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo1, bg='#FDF4C9',
-                  font=('courier new', 10, 'italic'), foreground='#445569').grid(row=0, column=1, sticky=E)
-            Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo2, bg='#FDF4C9',
-                  font=('courier new', 10, 'italic'), foreground='#445569').grid(row=1, column=1, sticky=E)
+            Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo1, bg='#FDF4C9', font=('courier new', 10, 'italic'), foreground='#445569').grid(row=0, column=1, sticky=E)
+            Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo2, bg='#FDF4C9', font=('courier new', 10, 'italic'), foreground='#445569').grid(row=1, column=1, sticky=E)
 
             if self.nb_joueurs >= 3:
-                Label(fr_entry_joueur, text="Joueur 3 :", pady=10, font=("Helvetica", 15),
-                      bg='#445569', foreground='white').grid(row=2, column=0, sticky=W)
+                Label(fr_entry_joueur, text="Joueur 3 :", pady=10, font=("Helvetica", 15), bg='#445569', foreground='white').grid(row=2, column=0, sticky=W)
                 self.form_joueurs.jo3 = StringVar()
                 self.form_joueurs.jo3.set("Joueur 3")
-                Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo3, bg='#FDF4C9',
-                      font=('courier new', 10, 'italic'), foreground='#445569').grid(row=2, column=1, sticky=E)
+                Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo3, bg='#FDF4C9', font=('courier new', 10, 'italic'), foreground='#445569').grid(row=2, column=1, sticky=E)
+            
             if self.nb_joueurs == 4:
-                Label(fr_entry_joueur, text="Joueur 4 :", pady=10, font=("Helvetica", 15), bg='#445569',
-                      foreground='white').grid(row=3, column=0, sticky=W)
+                Label(fr_entry_joueur, text="Joueur 4 :", pady=10, font=("Helvetica", 15), bg='#445569', foreground='white').grid(row=3, column=0, sticky=W)
                 self.form_joueurs.jo4 = StringVar()
                 self.form_joueurs.jo4.set("Joueur 4")
-                Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo4, bg='#FDF4C9',
-                      font=('courier new', 10, 'italic'), foreground='#445569').grid(row=3, column=1, sticky=E)
-            bouton_valider_joueurs = Button(self.form_joueurs, text="Nous sommes prêts à commencer",
-                                            command=self.comm_bouton_valider_joueurs, font=('Impact', 15), bg='#FDF4C9',
-                                            foreground="#445569").grid(row=10, column=0, pady=10)
-
+                Entry(fr_entry_joueur, textvariable=self.form_joueurs.jo4, bg='#FDF4C9', font=('courier new', 10, 'italic'), foreground='#445569').grid(row=3, column=1, sticky=E)
+            
+            bouton_valider_joueurs = Button(self.form_joueurs, text="We are ready to start", command=self.comm_bouton_valider_joueurs, font=('Impact', 15), bg='#FDF4C9', foreground="#445569").grid(row=10, column=0, pady=10)
             self.wait_window(self.form_joueurs)
 
-        self.geometry(
-            str(int(self.winfo_screenwidth() * 0.95)) + "x" + str(int(self.winfo_screenheight()) - 100) + "+0+0")
+        self.geometry(str(int(self.winfo_screenwidth() * 0.95)) + "x" + str(int(self.winfo_screenheight()) - 100) + "+0+0")
         self.frame_du_plateau = Frame(self, bg="#445569", bd=20)
         self.frame_du_plateau.grid(row=1, column=0, padx=10, pady=10, sticky=NSEW)
         self.plateau = Plateau(self.frame_du_plateau)
@@ -342,85 +323,74 @@ class Scrabble(Tk):
 
         self.grid_columnconfigure(0, weight=0)
         self.grid_rowconfigure(0, weight=0)
+        
         self.joueur_actif = None
 
-        Label(self, text='NOTRE SUPER PLATEAU DE SCRABBLE', font='Impact', bg='#FDF4C9').grid(row=0, column=0, padx=10,
-                                                                                              pady=10, sticky=NSEW)
-        Label(self, text='LES JOUEURS', font='Impact', bg='#FDF4C9').grid(row=0, column=1, padx=10, pady=10,
-                                                                          sticky=NSEW)
+        Label(self, text='OUR SUPER TRAY OF SCRABBLE', font='Impact', bg='#FDF4C9').grid(row=0, column=0, padx=10, pady=10, sticky=NSEW)
+        Label(self, text='THE PLAYERS', font='Impact', bg='#FDF4C9').grid(row=0, column=1, padx=10, pady=10, sticky=NSEW)
 
-        # Frame à côté du plateau:
-        self.frame_a_cote_plateau = Frame(self, bg="#445569", bd=20,
-                                          width=(Plateau.PIXELS_PAR_CASE * Plateau.DIMENSION),
-                                          height=Plateau.PIXELS_PAR_CASE * Plateau.DIMENSION)
+        # FRAME NEXT TO THE BOARD:
+        self.frame_a_cote_plateau = Frame(self, bg="#445569", bd=20, width=(Plateau.PIXELS_PAR_CASE * Plateau.DIMENSION), height=Plateau.PIXELS_PAR_CASE * Plateau.DIMENSION)
         self.frame_a_cote_plateau.grid(row=1, column=1, padx=10, pady=10, sticky=NSEW)
 
-        # FRAME POUR LES JOUEURS:
+        # FRAME FOR PLAYERS:
         self.mes_joueurs = Frame(self.frame_a_cote_plateau, bg="#445569")
         self.mes_joueurs.grid(row=3, column=0, padx=10, pady=10)
 
         self.frame_chevalet = Frame(self.frame_a_cote_plateau, bg="#445569")
         self.frame_chevalet.text = "ABS"
         self.frame_chevalet.grid(row=1, column=0)
+        
         self.chevalet = Chevalet(self.frame_chevalet)
         self.chevalet.bind("<Button-1>", self.gerer_click_jeton_chevalet)
         self.chevalet.grid(row=1, column=0)
+        
         self.fr_label_joueur_actif = Frame(self.frame_a_cote_plateau, bg='#445569', padx=100, pady=15)
         self.text_label_joueur_actif = StringVar()
 
         # self.text_label_joueur_actif.set(Scrabble.traduction_langue)
         self.fr_label_joueur_actif.grid(row=2, column=0)
-        self.label_joueur_actif = Label(self.fr_label_joueur_actif, textvariable=self.text_label_joueur_actif,
-                                        foreground='white', bg='#445569', font=("Helvetica", 20))
+        self.label_joueur_actif = Label(self.fr_label_joueur_actif, textvariable=self.text_label_joueur_actif, foreground='white', bg='#445569', font=("Helvetica", 20))
         self.label_joueur_actif.grid(row=0, column=0)
-
         self.width_button = 16
 
-        # Frame dans à côté du plateau avec la boite :
+        # FRAME IN BESIDE THE TRAY WITH THE BOX:
         la_boite = Frame(self.frame_a_cote_plateau, bg='#445569')
         la_boite.grid(row=4, column=0, padx=10, pady=10)
-        button_changer_lettres = Button(la_boite, text='Échanger des lettres', font='Impact', width=self.width_button,
-                                        bg='#FDF4C9', foreground="#445569")
+        
+        button_changer_lettres = Button(la_boite, text='Exchanging letters', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_changer_lettres.grid(row=0, column=0, padx=10, pady=10)
         button_changer_lettres.bind("<Button-1>", self.call_changer_lettres)
 
-        button_melanger = Button(la_boite, text='Mélange mes jetons', font='Impact', width=self.width_button,
-                                 bg='#FDF4C9', foreground="#445569")
+        button_melanger = Button(la_boite, text='Mix my tockens', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_melanger.grid(row=0, column=1, padx=10, pady=10)
         button_melanger.bind("<Button-1>", self.call_melanger_jetons)
 
-        button_passer = Button(la_boite, text='Passer mon tour', font='Impact', width=self.width_button, bg='#FDF4C9',
-                               foreground="#445569")
+        button_passer = Button(la_boite, text='Pass my turn', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_passer.grid(row=0, column=2, padx=10, pady=10)
         button_passer.bind("<Button-1>", self.call_joueur_suivant)
 
-        button_valider = Button(la_boite, text='Valider tour', font='Impact', width=self.width_button, bg='#FDF4C9',
-                                foreground="#445569")
+        button_valider = Button(la_boite, text='Validate my turn', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_valider.grid(row=1, column=0, padx=10, pady=10)
         button_valider.bind("<Button-1>", self.call_valider_tour)
 
-        button_reprise_jetons = Button(la_boite, text='Reprendre jetons', font='Impact', width=self.width_button,
-                                       bg='#FDF4C9', foreground="#445569")
+        button_reprise_jetons = Button(la_boite, text='Take back my tockens', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_reprise_jetons.grid(row=1, column=1, padx=10, pady=10)
         button_reprise_jetons.bind("<Button-1>", self.call_reprendre_jetons)
 
-        button_nouvelle_partie = Button(la_boite, text='Nouvelle partie', font='Impact', width=self.width_button,
-                                        bg='#FDF4C9', foreground="#445569")
+        button_nouvelle_partie = Button(la_boite, text='New part', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_nouvelle_partie.grid(row=1, column=2, padx=10, pady=10)
         button_nouvelle_partie.bind("<Button-1>", self.call_nouvelle_partie)
 
-        button_enregistrer_partie = Button(la_boite, text='Enregistrer partie', font='Impact', width=self.width_button,
-                                           bg='#FDF4C9', foreground="#445569")
+        button_enregistrer_partie = Button(la_boite, text='Save part', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_enregistrer_partie.grid(row=2, column=0, padx=10, pady=10)
         button_enregistrer_partie.bind("<Button-1>", self.call_sauvegarde)
 
-        button_liste_mot = Button(la_boite, text='Mots du plateau', font='Impact', width=self.width_button,
-                                  bg='#FDF4C9', foreground="#445569")
+        button_liste_mot = Button(la_boite, text='Words from the board', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_liste_mot.grid(row=2, column=1, padx=10, pady=10)
         button_liste_mot.bind("<Button-1>", self.call_liste_mots_au_plateau)
 
-        button_abandonner = Button(la_boite, text='Abandonner', font='Impact', width=self.width_button, bg='#FDF4C9',
-                                   foreground="#445569")
+        button_abandonner = Button(la_boite, text='To abandon', font='Impact', width=self.width_button, bg='#FDF4C9', foreground="#445569")
         button_abandonner.grid(row=2, column=2, padx=10, pady=10)
         button_abandonner.bind("<Button-1>", self.call_joueur_abandonne)
 
@@ -431,12 +401,13 @@ class Scrabble(Tk):
             self.plateau.dessiner_plateau()
             for i in range(self.nb_joueurs_restants):
                 self.joueur_suivant()
-            messagebox.showinfo(title="Vous revoilà !", message="Continuons la partie où nous l'avions laissée...")
+            messagebox.showinfo(title="You're back !", message="Let's continue the part where we left it...")   
+            
         self.protocol("WM_DELETE_WINDOW", self.demande_sauvegarde_avant_quitter)
 
+        
     def demande_sauvegarde_avant_quitter(self):
-        x = messagebox.askyesnocancel(title="La fenêtre veut fermer...",
-                                      message="Voulez-vous sauvegarder la partie avant de quitter ?")
+        x = messagebox.askyesnocancel(title="The window wants to close...", message="Do you want to save the game before leaving ?" )
         if x is True:
             self.sauvegarde()
         if x is False:
@@ -444,15 +415,13 @@ class Scrabble(Tk):
         if x is None:
             pass
 
+        
     def call_nouvelle_partie(self, event):
-        x = messagebox.askyesnocancel(title="Repartir à zéro...", message="Une nouvelle partie va commencer avec"
-                                                                          " les mêmes joueurs.\n\nVoulez-vous sauvegarder la partie avant de quitter ?")
+        x = messagebox.askyesnocancel(title="Start from scratch...", message="A new game will start with the same players.\n\nDo you want to save the game before leaving ?" )
         if x is True:
             self.sauvegarde_sans_quitter()
-
         if x is True or x is False:
-            self.jetons_libres = [Jeton(lettre, valeur) for lettre, occurences, valeur in data for i in
-                                  range(occurences)]
+            self.jetons_libres = [Jeton(lettre, valeur) for lettre, occurences, valeur in data for i in range(occurences)]
             for i in range(Plateau.DIMENSION):
                 for j in range(Plateau.DIMENSION):
                     self.plateau.cases[i][j].jeton_occupant = None
@@ -464,107 +433,92 @@ class Scrabble(Tk):
             self.dessiner_joueurs()
             for j in range(7):
                 Chevalet.dessiner_jeton_chevalet(self.chevalet, None, j)
-            messagebox.showinfo("Ça recommence...", message="La nouvelle partie va commencer.\n\nBonne chance !")
+            messagebox.showinfo("It starts again...", message="The new game will begin.\n\nGood luck !")
             self.joueur_actif = None
             self.joueur_suivant()
-            messagebox.showinfo(title="C'est le hasard qui décide...",
-                                message="Le premier joueur sera: {}.".format(self.joueur_actif.nom))
+            messagebox.showinfo(title="It's chance that decides ...", message="The first player will be: {}.".format(self.joueur_actif.nom))
             self.mots_au_plateau = []
 
+            
     def redimensionner(self, event):
-
         self.largeur_app = event.width
 
+        
     def call_sauvegarde(self, event):
         if self.liste_codes_position_a_valider != []:
-            raise jetons_sur_plateau("de sauvegarder.")
+            raise jetons_sur_plateau("back up.")
         else:
             self.sauvegarde()
 
+            
     def sauvegarde(self):
-        partie = Sauvegarde(self.nb_joueurs, self.nb_joueurs_restants,
-                            self.plateau.cases, self.jetons_libres, self.joueurs, self.joueur_actif,
-                            self.mots_au_plateau, self.langue)
+        partie = Sauvegarde(self.nb_joueurs, self.nb_joueurs_restants, self.plateau.cases, self.jetons_libres, self.joueurs, self.joueur_actif, self.mots_au_plateau, self.langue)
         valide = False
         while not valide:
             nom_fichier = filedialog.asksaveasfilename()
             with open(nom_fichier, "wb") as f:
                 pickle.dump(partie, f)
             valide = True
-            continuer = messagebox.askyesno(title="Partie sauvegardée...",
-                                            message="La partie est sauvegardée, voulez-vous continuer à jouer ?")
-
+            continuer = messagebox.askyesno(title="Saved game....", message="The game is saved, do you want to keep playing ?")
             if continuer is False:
-                messagebox._show(title="Il est parti!", message="Au revoir!")
+                messagebox._show(title="He left!", message="Goodbye!")
                 self.destroy()
 
+                
     def sauvegarde_sans_quitter(self):
-        partie = Sauvegarde(self.nb_joueurs, self.nb_joueurs_restants,
-                            self.plateau.cases, self.jetons_libres, self.joueurs, self.joueur_actif,
-                            self.mots_au_plateau, self.langue)
+        partie = Sauvegarde(self.nb_joueurs, self.nb_joueurs_restants, self.plateau.cases, self.jetons_libres, self.joueurs, self.joueur_actif, self.mots_au_plateau, self.langue)
         valide = False
         while not valide:
             nom_fichier = filedialog.asksaveasfilename()
             with open(nom_fichier, "wb") as f:
                 pickle.dump(partie, f)
             valide = True
-            messagebox.showinfo(title="Partie sauvegardée...", message="La partie est sauvegardée")
+            messagebox.showinfo(title="Saved game message="The game is saved.")
 
-    def dessiner_joueurs(self):
+                                
+    def dessiner_joueurs(self):                               
         if self.joueur_actif == self.joueurs[0]:
-            joueur1 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red",
-                            highlightthickness=10)
+            joueur1 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red", highlightthickness=10)
         else:
-            joueur1 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9",
-                            highlightthickness=10)
+            joueur1 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9", highlightthickness=10)
+        
         joueur1.grid(row=1, column=0, padx=10, pady=10)
-        self.label_score_joueur1 = Label(joueur1, text="Score: {}".format(self.joueurs[0].points),
-                                         font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
+        self.label_score_joueur1 = Label(joueur1, text="Score: {}".format(self.joueurs[0].points), font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
         self.label_score_joueur1.grid(row=3, column=0)
         self.label_nom1 = Label(joueur1, text=self.joueurs[0].nom, font=("Impact", 20), bg='#FDF4C9', width=21)
         self.label_nom1.grid(row=0, column=0, sticky=N)
-
         chevalet1 = Frame(joueur1)
         chevalet1.grid(row=4, column=0)
 
+        # Frame in Players with Player 1:
         if self.joueurs[0].a_abandonne is True:
             self.abandonne1 = PhotoImage(file='abandonne.png')
             self.abandonne1_label1 = Label(chevalet1, image=self.abandonne1, bg='#FDF4C9')
             self.abandonne1_label1.grid(row=1, column=0, sticky=NSEW)
-
         else:
-            self.label_lettre1_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(0)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre1_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(0)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre1_joueur1.grid(row=0, column=0)
-            self.label_lettre2_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(1)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre2_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(1)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre2_joueur1.grid(row=0, column=1)
-            self.label_lettre3_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(2)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre3_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(2)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre3_joueur1.grid(row=0, column=2)
-            self.label_lettre4_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(3)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre4_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(3)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre4_joueur1.grid(row=0, column=3)
-            self.label_lettre5_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(4)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre5_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(4)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre5_joueur1.grid(row=0, column=4)
-            self.label_lettre6_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(5)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre6_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(5)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre6_joueur1.grid(row=0, column=5)
-            self.label_lettre7_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(6)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre7_joueur1 = Label(chevalet1, text="{}".format(self.joueurs[0].obtenir_jeton(6)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre7_joueur1.grid(row=0, column=6)
 
-        # Frame dans les joueurs avec Joueur 2 :
+        # Frame in Players with Player 2:
         if self.joueur_actif == self.joueurs[1]:
-            joueur2 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red",
-                            highlightthickness=10)
+            joueur2 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red",highlightthickness=10)
         else:
-            joueur2 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9",
-                            highlightthickness=10)
+            joueur2 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9",highlightthickness=10)
+        
         joueur2.grid(row=1, column=1, padx=10, pady=10)
-        self.label_score_joueur2 = Label(joueur2, text="Score: {}".format(self.joueurs[1].points),
-                                         font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
+        self.label_score_joueur2 = Label(joueur2, text="Score: {}".format(self.joueurs[1].points),font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
         self.label_score_joueur2.grid(row=3, column=0)
         self.label_nom2 = Label(joueur2, text=self.joueurs[1].nom, font=("Impact", 20), bg='#FDF4C9')
         self.label_nom2.grid(row=0, column=0, sticky=N)
@@ -575,42 +529,31 @@ class Scrabble(Tk):
             self.abandonne2 = PhotoImage(file='abandonne.png')
             self.abandonne2_label1 = Label(chevalet2, image=self.abandonne2, bg='#FDF4C9')
             self.abandonne2_label1.grid(row=1, column=0, sticky=NSEW)
-
         else:
-            self.label_lettre1_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(0)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre1_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(0)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre1_joueur2.grid(row=0, column=0)
-            self.label_lettre2_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(1)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre2_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(1)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre2_joueur2.grid(row=0, column=1)
-            self.label_lettre3_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(2)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre3_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(2)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre3_joueur2.grid(row=0, column=2)
-            self.label_lettre4_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(3)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre4_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(3)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre4_joueur2.grid(row=0, column=3)
-            self.label_lettre5_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(4)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre5_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(4)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre5_joueur2.grid(row=0, column=4)
-            self.label_lettre6_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(5)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre6_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(5)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre6_joueur2.grid(row=0, column=5)
-            self.label_lettre7_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(6)),
-                                               font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+            self.label_lettre7_joueur2 = Label(chevalet2, text="{}".format(self.joueurs[1].obtenir_jeton(6)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
             self.label_lettre7_joueur2.grid(row=0, column=6)
 
-        # Frame dans les joueurs avec Joueur 3 :
+        # Frame in Players with Player 3:
         if nb_joueurs >= 3:
             if self.joueur_actif == self.joueurs[2]:
-                joueur3 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red",
-                                highlightthickness=10)
+                joueur3 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red",highlightthickness=10)
             else:
-                joueur3 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9",
-                                highlightthickness=10)
+                joueur3 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9",highlightthickness=10)
+            
             joueur3.grid(row=2, column=0, padx=10, pady=10)
-
-            self.label_score_joueur3 = Label(joueur3, text="Score: {}".format(self.joueurs[2].points),
-                                             font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
+            self.label_score_joueur3 = Label(joueur3, text="Score: {}".format(self.joueurs[2].points),font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
             self.label_score_joueur3.grid(row=3, column=0)
             self.label_nom3 = Label(joueur3, text=self.joueurs[2].nom, font=("Impact", 20), bg='#FDF4C9')
             self.label_nom3.grid(row=0, column=0, sticky=N)
@@ -621,41 +564,31 @@ class Scrabble(Tk):
                 self.abandonne3 = PhotoImage(file='abandonne.png')
                 self.abandonne3_label1 = Label(chevalet3, image=self.abandonne3, bg='#FDF4C9')
                 self.abandonne3_label1.grid(row=1, column=0, sticky=NSEW)
-
             else:
-                self.label_lettre1_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(0)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre1_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(0)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre1_joueur3.grid(row=0, column=0)
-                self.label_lettre2_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(1)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre2_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(1)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre2_joueur3.grid(row=0, column=1)
-                self.label_lettre3_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(2)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre3_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(2)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre3_joueur3.grid(row=0, column=2)
-                self.label_lettre4_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(3)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre4_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(3)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre4_joueur3.grid(row=0, column=3)
-                self.label_lettre5_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(4)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre5_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(4)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre5_joueur3.grid(row=0, column=4)
-                self.label_lettre6_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(5)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre6_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(5)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre6_joueur3.grid(row=0, column=5)
-                self.label_lettre7_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(6)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre7_joueur3 = Label(chevalet3, text="{}".format(self.joueurs[2].obtenir_jeton(6)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre7_joueur3.grid(row=0, column=6)
 
-        # Frame dans les joueurs avec Joueur 4 :
+        # Frame in Players with Player 4:
         if nb_joueurs == 4:
             if self.joueur_actif == self.joueurs[3]:
-                joueur4 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red",
-                                highlightthickness=10)
+                joueur4 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="red", highlightcolor="red",highlightthickness=10)
             else:
-                joueur4 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9",
-                                highlightthickness=10)
+                joueur4 = Frame(self.mes_joueurs, bg='#FDF4C9', highlightbackground="#FDF4C9", highlightcolor="#FDF4C9",highlightthickness=10)
+            
             joueur4.grid(row=2, column=1, padx=10, pady=10)
-            self.label_score_joueur4 = Label(joueur4, text="Score: {}".format(self.joueurs[3].points),
-                                             font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
+            self.label_score_joueur4 = Label(joueur4, text="Score: {}".format(self.joueurs[3].points),font=("Helvetica", 16), bg='#FDF4C9', width=23)  # sticky=NE
             self.label_score_joueur4.grid(row=3, column=0)
             self.label_nom4 = Label(joueur4, text=self.joueurs[3].nom, font=("Impact", 20), bg='#FDF4C9')
             self.label_nom4.grid(row=0, column=0, sticky=N)
@@ -667,40 +600,32 @@ class Scrabble(Tk):
                 self.abandonne4_label1 = Label(chevalet4, image=self.abandonne4, bg='#FDF4C9')
                 self.abandonne4_label1.grid(row=1, column=0, sticky=NSEW)
             else:
-                self.label_lettre1_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(0)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre1_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(0)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre1_joueur4.grid(row=0, column=0)
-                self.label_lettre2_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(1)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre2_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(1)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre2_joueur4.grid(row=0, column=1)
-                self.label_lettre3_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(2)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre3_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(2)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre3_joueur4.grid(row=0, column=2)
-                self.label_lettre4_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(3)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre4_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(3)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre4_joueur4.grid(row=0, column=3)
-                self.label_lettre5_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(4)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre5_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(4)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre5_joueur4.grid(row=0, column=4)
-                self.label_lettre6_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(5)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre6_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(5)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre6_joueur4.grid(row=0, column=5)
-                self.label_lettre7_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(6)),
-                                                   font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
+                self.label_lettre7_joueur4 = Label(chevalet4, text="{}".format(self.joueurs[3].obtenir_jeton(6)),font=("Helvetica", 16), bg='#FDF4C9')  # sticky=NE
                 self.label_lettre7_joueur4.grid(row=0, column=6)
-
-    def gerer_click_jeton_chevalet(self, event):
+                                
+                                
+    def gerer_click_jeton_chevalet(self, event):                               
         pos = int(event.x // Chevalet.PIXELS_PAR_CASE)
         if self.position_jeton_selectionne is None:
             self.position_jeton_selectionne = pos
             self.affiche_chevalet_joueur_actif()
-
         else:
             if pos == self.position_jeton_selectionne:
                 self.position_jeton_selectionne = None
                 self.affiche_chevalet_joueur_actif()
             else:
-
                 self.joueur_actif.permuter_jetons(pos, self.position_jeton_selectionne)
                 self.dessiner_joueurs()
                 self.position_jeton_selectionne = None
@@ -721,11 +646,8 @@ class Scrabble(Tk):
                 self.dessiner_joueurs()
                 self.position_jeton_selectionne = None
                 self.affiche_chevalet_joueur_actif()
-
-
                 self.liste_codes_position_a_valider += [ code_position]
                 self.liste_lettre_a_valider += [jeton]
-
         else:
             if code_position in self.liste_codes_position_a_valider:
                 jeton = self.plateau.retirer_jeton(code_position)
@@ -735,30 +657,24 @@ class Scrabble(Tk):
                 self.joueur_actif.ajouter_jeton(jeton)
                 self.affiche_chevalet_joueur_actif()
                 self.plateau.dessiner_plateau()
-
             self.position_jeton_selectionne = None
             self.affiche_chevalet_joueur_actif()
 
     def call_joueur_abandonne(self,event):
-
         if self.liste_codes_position_a_valider != []:
-            raise jetons_sur_plateau("d'abandonner la partie.")
+            raise jetons_sur_plateau("to give up the game.")
         else:
             self.confirmation_abandon = False
-            if messagebox.askyesno(title="Ça devient trop compliqué ?",
-                                   message="{}, voulez-vous vraiment abandonner ?".format(self.joueur_actif.nom)):
+            if messagebox.askyesno(title="It's getting too complicated ?",message="{}, Do you really want to give up ?".format(self.joueur_actif.nom)):
                 self.joueur_actif.a_abandonne = True
                 self.nb_joueurs_restants -= 1
                 self.joueur_suivant()
                 if self.partie_terminee():
-                    messagebox.showinfo(title="Oh! Comme nous avons eu du plaisir !",
-                                        message="Partie terminée !\n\n{} a remporté la partie car il est le seul joueur"
-                                                " restant.\n\n Il remporte avec un score de {} points."
-                                                "\n\n".format(self.joueur_actif.nom, self.joueur_actif.points))
+                    messagebox.showinfo(title="Oh! As we had fun!", message="Game over !\n\n{} Won the game because he is the only remaining player.\n\n He wins with a score of {} points.\n\n".format(self.joueur_actif.nom, self.joueur_actif.points))
                     self.destroy()
-
                 self.dessiner_joueurs()
 
+                                
     def comm_bouton_valider_joueurs(self):
         self.joueurs[0].nom = self.form_joueurs.jo1.get()
         self.joueurs[1].nom = self.form_joueurs.jo2.get()
@@ -768,6 +684,7 @@ class Scrabble(Tk):
             self.joueurs[3].nom = self.form_joueurs.jo4.get()
         self.form_joueurs.destroy()
 
+                                
     def valider_positions_jetons(self):
         if self.plateau.valider_positions_avant_ajout(self.liste_codes_position_a_valider) is not True:
             try:
@@ -777,14 +694,12 @@ class Scrabble(Tk):
             return False
         return True
 
+                                
     def call_valider_tour(self, event):
-
         if self.liste_codes_position_a_valider == []:
             self.grab_set()  # Prevent clicking root while messagebox is open
-            messagebox.showinfo(title="Rien ne se passe...",
-                                message="Il faut placer au moins une lettre pour pouvoir valider. ")
+            messagebox.showinfo(title="Rien ne se passe...", message="At least one letter must be placed in order to validate.")
             self.wait_window()  # Prevent clicking root while messagebox is open
-
         else:
             if self.valider_positions_jetons():
                 mots, score = self.plateau.placer_mots(self.liste_lettre_a_valider, self.liste_codes_position_a_valider)
@@ -793,41 +708,39 @@ class Scrabble(Tk):
                         raise mots_non_valides()
                     finally:
                         self.reprendre_jetons()
-
                 else:
-                    messagebox.showinfo(title="Bon coup !", message="Bravo {}\n\nMot(s) formé(s):\n{}".
-                                        format(self.joueur_actif.nom, "\n".join(mots) + "\nScore obtenu:" + str(score)))
-
+                    messagebox.showinfo(title="Good shot!", message="Well done {}\n\nWord(s) formed(s):\n{}".format(self.joueur_actif.nom, "\n".join(mots) + "\nScore obtained:" + str(score)) )
                     self.joueur_actif.ajouter_points(score)
                     self.mots_au_plateau += mots
                     valide = True
                     self.joueur_suivant()
 
+                                
     def call_reprendre_jetons(self, event):
         self.reprendre_jetons()
 
-    def reprendre_jetons(self):
+                                
+    def reprendre_jetons(self):                               
         for pos in self.liste_codes_position_a_valider:
             jeton = self.plateau.retirer_jeton(pos)
             self.joueur_actif.ajouter_jeton(jeton)
         self.dessiner_joueurs()
-        self.plateau.dessiner_plateau()
+        self.plateau.dessiner_plateau()                               
         for i in range(Chevalet.DIMENSION):
-            Chevalet.dessiner_jeton_chevalet(self.chevalet, self.joueur_actif.obtenir_jeton(i), i,
-                                             self.position_jeton_selectionne)
+            Chevalet.dessiner_jeton_chevalet(self.chevalet, self.joueur_actif.obtenir_jeton(i), i, self.position_jeton_selectionne)
         self.liste_lettre_a_valider = []
         self.liste_codes_position_a_valider = []
 
+                                
     def call_joueur_suivant(self, event):
-
         if self.liste_codes_position_a_valider != []:
-            raise jetons_sur_plateau("de passer votre tour !")
-
+            raise jetons_sur_plateau("to pass your turn !")
         else:
             self.position_jeton_selectionne = None
             self.joueur_suivant()
             self.affiche_chevalet_joueur_actif()
 
+                                
     def call_melanger_jetons(self, event):
         self.position_jeton_selectionne = None
         self.joueur_actif.melanger_jetons()
@@ -835,59 +748,55 @@ class Scrabble(Tk):
         self.dessiner_joueurs()
         self.affiche_chevalet_joueur_actif()
 
+                                
     def call_liste_mots_au_plateau(self, event):
-        str = """Les mots au plateau sont:\n{}""".format("\n".join(self.mots_au_plateau))
-        messagebox.showinfo(title="En un mot, voici les mots",
-                            message=str)
+        str = """The words on the board are:\n{}""".format("\n".join(self.mots_au_plateau))
+        messagebox.showinfo(title="In a word, here are the words", message=str)
 
+                                
     def call_changer_lettres(self, event):
         if self.liste_codes_position_a_valider != []:
-            raise jetons_sur_plateau("de changer des lettres.")
+            raise jetons_sur_plateau("to change letters.")
         else:
             self.liste_positions_lettres_a_changer = []
             # Prevent clicking root while toplevel is open
             self.form_changer_lettres = Toplevel(self)
             self.form_changer_lettres.grab_set()
-            self.form_changer_lettres.title("Échangeons des lettres")
+            self.form_changer_lettres.title("Exchange the letters")
             self.form_changer_lettres.configure(bg="#445569")
-
             fr_intro = Frame(self.form_changer_lettres)
-            fr_intro.grid(row=0, column=0)
-            label_intro = Label(fr_intro,
-                                text="Veuillez sélectionner en bleu les lettres que vous désirez échanger puis appuyer sur VALIDER.\n\n Vos lettres seront changées, mais vous perdrez votre tour.",
-                                padx=50, pady=20, foreground='white', bg='#445569', font=("Helvetica", 20))
+            fr_intro.grid(row=0, column=0)                               
+            label_intro = Label(fr_intro, text="Please select in blue the letters you wish to exchange then press OK.\n\n Your letters will be changed, but you will lose your turn padx=50, pady=20, foreground='white', bg='#445569', font=("Helvetica", 20) )
             label_intro.grid(row=0, column=0)
-
             fr_chevalet = Frame(self.form_changer_lettres)
             fr_chevalet.grid(row=1, column=0)
-
             self.chevalet = Chevalet(self.form_changer_lettres)
             self.chevalet.grid(row=2, column=0, padx=50, pady=20)
+                                
             for i in range(Chevalet.DIMENSION):
-                Chevalet.dessiner_jeton_chevalet(self.chevalet, self.joueur_actif.obtenir_jeton(i), i,
-                                                 self.position_jeton_selectionne)
-            self.chevalet.bind("<Button-1>", self.gerer_click_jeton_chevalet_a_changer)
-            self.form_changer_lettres.protocol("WM_DELETE_WINDOW", self.form_changer_lettres_close)
-
-            self.valider_change_lettres = Button(self.form_changer_lettres, text='Échanger les lettres', font='Impact',
-                                                 width=self.width_button, bg='#FDF4C9', foreground="#445569")
+                Chevalet.dessiner_jeton_chevalet(self.chevalet, self.joueur_actif.obtenir_jeton(i), i, self.position_jeton_selectionne )
+            
+            self.chevalet.bind("<Button-1>", self.gerer_click_jeton_chevalet_a_changer)         
+            self.form_changer_lettres.protocol("WM_DELETE_WINDOW", self.form_changer_lettres_close)           
+            self.valider_change_lettres = Button(self.form_changer_lettres, text='Exchange the letters', font='Impact',width=self.width_button, bg='#FDF4C9', foreground="#445569")
             self.valider_change_lettres.grid(padx=10, pady=20)
-            self.valider_change_lettres.bind("<Button-1>", self.call_valider_change_lettres)
-            self.annule_change_lettres = Button(self.form_changer_lettres,
-                                                text='Annuler, je ne veux pas perdre mon tour', font='Impact', width=50,
-                                                bg='#FDF4C9', foreground="#445569")
+            self.valider_change_lettres.bind("<Button-1>", self.call_valider_change_lettres)           
+            self.annule_change_lettres = Button(self.form_changer_lettres, text='Cancel, I do not want to lose my turn', font='Impact', width=50, bg='#FDF4C9', foreground="#445569")
             self.annule_change_lettres.grid(padx=10, pady=20)
-            self.annule_change_lettres.bind("<Button-1>", self.call_annule_change_lettres)
+            self.annule_change_lettres.bind("<Button-1>", self.call_annule_change_lettres)            
             self.wait_window()  # Prevent clicking root while toplevel is open
 
+                                
     def call_valider_change_lettres(self, event):
         self.changer_jetons(self.liste_positions_lettres_a_changer)
         self.joueur_suivant()
         self.form_changer_lettres_close()
 
+                                
     def call_annule_change_lettres(self, event):
         self.form_changer_lettres.destroy()
 
+                                
     def gerer_click_jeton_chevalet_a_changer(self, event):
         pos = int(event.x // Chevalet.PIXELS_PAR_CASE)
         if pos not in self.liste_positions_lettres_a_changer:
@@ -896,81 +805,83 @@ class Scrabble(Tk):
             self.liste_positions_lettres_a_changer.remove(pos)
         for i in range(Chevalet.DIMENSION):
             if i not in self.liste_positions_lettres_a_changer:
-                Chevalet.dessiner_jeton_chevalet(self.chevalet,
-                                                 self.joueur_actif.obtenir_jeton(i), i, self.position_jeton_selectionne)
+                Chevalet.dessiner_jeton_chevalet(self.chevalet,self.joueur_actif.obtenir_jeton(i), i, self.position_jeton_selectionne)
             else:
                 Chevalet.dessiner_jeton_chevalet(self.chevalet, self.joueur_actif.obtenir_jeton(i), i, i)
 
+                                
     def form_changer_lettres_close(self):
         self.form_changer_lettres.destroy()
 
+                                
     def affiche_chevalet_joueur_actif(self):
         self.chevalet.delete(self)
         self.chevalet = Chevalet(self.frame_a_cote_plateau)
         self.chevalet.grid(row=1, column=0)
         for i in range(Chevalet.DIMENSION):
-            Chevalet.dessiner_jeton_chevalet(self.chevalet,
-                                             self.joueur_actif.obtenir_jeton(i), i, self.position_jeton_selectionne)
+            Chevalet.dessiner_jeton_chevalet(self.chevalet,self.joueur_actif.obtenir_jeton(i), i, self.position_jeton_selectionne)
         if len(self.jetons_libres) == 0:
-            messagebox.showinfo(title="Partie terminée!",
-                                message="Tous les jetons ont été distribués, la partie est maintenant terminée.\n\n"
-                                        "Le joueur gagnant est {0} avec {1} points.\n\n"
-                                        "Félicitations {0}!!\n\nLe programme va maintenant"
-                                        " se fermer, au revoir!".format(self.determiner_gagnant().
-                                                                        nom, self.determiner_gagnant().points))
+            messagebox.showinfo( title="Game over!", message="All the tockens have been distributed, the game is now over.\n\nThe winning player is {0} with {1} points.\n\nCongratulations {0}!!\n\nThe program will now close, goodbye!".format(self.determiner_gagnant().nom, self.determiner_gagnant().points) )
             global quitter
             quitter = True
             self.destroy()
         self.chevalet.bind("<Button-1>", self.gerer_click_jeton_chevalet)
 
+                                
     def mot_permis(self, mot):
         """
-        Permet de savoir si un mot est permis dans la partie ou pas en regardant dans le dictionnaire.
-        :param mot: str, mot à vérifier.
-        :return: bool, True si le mot est dans le dictionnaire, False sinon.
+        Lets know if a word is allowed in the game or not by looking in the dictionary.
+        :param mot: str, word to check.
+        :return: bool, if the word is in the dictionary, False otherwise.
         """
-        # retourne True si mot est dans le dict, False sinon...
-        # upper car le read converti le dictionnaire en upper
+        
+        # return True if word is in the dict, False otherwise ...
+        # upper because the read converts the dictionary to upper
         return mot.upper() in self.dictionnaire
 
+                                
     def determiner_gagnant(self):
         """
-        Détermine le joueur gagnant, s'il y en a un. Pour déterminer si un joueur est le gagnant,
-        il doit avoir le pointage le plus élevé de tous.
-        :return: Joueur, un des joueurs gagnants, i.e si plusieurs sont à égalité on prend un au hasard.
+        Determine the winning player, if there is one. To determine if a player is the winner,
+        he must have the highest score of all.
+        :return: Player, one of the winning players, i.e if several are tied we take one at random.
         """
-        # On retourne le dernier élément de la liste de joueurs triée en ordre croissant selon
-        # le nombre de points des joueurs
+        
+        # We return the last element of the list of players sorted in ascending order according to 
+        # the number of points of the players
         return sorted(self.joueurs, key=lambda joueur: joueur.points)[-1]
 
+                                
     def partie_terminee(self):
         """
-        Vérifie si la partie est terminée. Une partie est terminée si il
-        n'existe plus de jetons libres ou il reste moins de deux (2) joueurs. C'est la règle que nous avons choisi
-        d'utiliser pour ce travail, donc essayez de
-        négliger les autres que vous connaissez ou avez lu sur Internet.
+        Check if the game is over. A game is over if there are no more free chips or there are 
+        less than two (2) players left. This is the rule we have chosen to use for this job, 
+        so try to neglect others you know or have read on the Internet.
         Returns:
-            bool: True si la partie est terminée, et False autrement.
+            bool: True if the game is over, and False otherwise.
         """
+        
         return self.jetons_libres == [] or self.nb_joueurs_restants == 1
 
+                                
     def joueur_suivant(self):
         """
-        Change le joueur actif.
-        Le nouveau joueur actif est celui à l'index du (joueur courant + 1)% nb_joueurs.
-        Si on n'a aucun joueur actif, on détermine au harsard le suivant.
+        Change the active player.
+        The new active player is the one at the index of (current player + 1)% nb_joueurs.
+        The new active player is the one at the index of (current player + 1)%
         """
-        # On réévalue nb_joueurs en cas qu'un des joueurs originaux ait quitté
+        
+        # Players are re-evaluated in case one of the original players leaves
         self.nb_joueurs = len(self.joueurs)
 
-        # On détermine un joueur au hasard si aucun joueur actif
+        # A random player is determined if no active player
         if self.joueur_actif is None:
             self.joueur_actif = self.joueurs[randint(0, nb_joueurs - 1)]
 
-        # On passe au suivant
+        # We move on to the next
         index_courant = self.joueurs.index(self.joueur_actif)
         self.joueur_actif = self.joueurs[(index_courant + 1) % self.nb_joueurs]
-        self.text_label_joueur_actif.set("{}, c'est à ton tour de jouer.".format(self.joueur_actif.nom))
+        self.text_label_joueur_actif.set("{}, it's your turn to play.".format(self.joueur_actif.nom))
         if self.joueur_actif.a_abandonne:
             self.joueur_suivant()
         for i in range(len(self.joueurs)):
@@ -985,112 +896,113 @@ class Scrabble(Tk):
         self.liste_lettre_a_valider = []
         self.liste_positions_lettres_a_changer = []
 
+                                
     def tirer_jetons(self, n):
         """
-        Simule le tirage de n jetons du sac à jetons et renvoie ceux-ci.
-        Il s'agit de prendre au hasard des jetons dans self.jetons_libres et de les retourner.
-        Pensez à utiliser la fonction shuffle du module random.
-        :param n: le nombre de jetons à tirer.
-        :return: Jeton list, la liste des jetons tirés.
-        :exception: Levez une exception avec assert si n ne respecte pas la condition 0 <= n <= 7.
+        Simulates the draw of n tokens of the coin bag and returns them.
+        It's a question of randomly taking tokens in self.jetons_libres and returning them.
+         Remember to use the shuffle function of the random module.
+        :param n: the number of tokens to shoot.
+        :return: Token list, the list of chips drawn.
+        :exception: raise an exception with assert if n does not respect the condition 0 <= n <= 7.
         """
-        assert 0 <= n <= 7, "Le nombre de jetons à tirer au sort est invalide"
-        shuffle(self.jetons_libres)  # On mélange les jetons
-        jeton_liste = self.jetons_libres[:n]  # On crée une liste des jetons qu'on tire
-        self.jetons_libres = self.jetons_libres[n:]  # Les jetons libres excluent maintenant ceux tirés
-        return jeton_liste  # On retourne la liste des jetons tirés
+                                
+        assert 0 <= n <= 7, "The number of tokens to draw is invalid"
+        shuffle(self.jetons_libres)                     # We mix the tokens
+        jeton_liste = self.jetons_libres[:n]            # We create a list of tokens we draw
+        self.jetons_libres = self.jetons_libres[n:]     # Free tokens now exclude those drawn
+        return jeton_liste                              # We return the list of tockens drawn
 
+                                
     def jouer_un_tour(self):
-        """ *** Vous n'avez pas à coder cette méthode ***
-        Faire jouer à un des joueurs son tour entier jusqu'à ce qu'il place un mot valide sur le
-        plateau.
-        Pour ce faire
-        1 - Afficher le plateau puis le joueur;
-        2 - Demander les positions à jouer;
-        3 - Retirer les jetons du chevalet;
-        4 - Valider si les positions sont valides pour un ajout sur le plateau;
-        5 - Si oui, placer les jetons sur le plateau, sinon retourner en 1;
-        6 - Si tous les mots formés sont dans le dictionnaire, alors ajouter les points au joueur actif;
-        7 - Sinon retirer les jetons du plateau et les remettre sur le chevalet du joueur, puis repartir en 1;
-        8 - Afficher le plateau.
-
-        :return: Ne retourne rien.
+        """ 
+        Play one of the players around until he places a valid word on the board.
+        To do this
+        1 - Show the board then the player;
+        2 - Ask for positions to play;
+        3 - Remove the chips from the bridge;
+        4 - Validate if the positions are valid for an addition on the board;
+        5 - If yes, place the tocken on the board, otherwise go back to 1;
+        6 - If all the words formed are in the dictionary, then add the points to the active player;
+        7 - Otherwise remove the tockens from the board and put them back on the player's bridge, then start again at 1;
+        8 - Show the board.
+        :return: Do not return anything.
         """
 
         self.chevalet = Chevalet(self.frame_a_cote_plateau)
         self.chevalet.grid(row=1, column=0)
         for i in range(Chevalet.DIMENSION):
             Chevalet.dessiner_jeton_chevalet(self.chevalet, self.joueur_actif.obtenir_jeton(i),i)
-
         self.update()
         valide = False
 
+                                
     def changer_jetons(self, pos_chevalet):
         """
-        Faire changer au joueur actif ses jetons. La méthode doit demander au joueur de saisir les positions à
-        changer les unes après les autres séparés par un espace.
-        Si une position est invalide (utilisez Joueur.position_est_valide) alors redemander.
-        Dès que toutes les positions valides les retirer du chevalier du joueur et lui en donner de nouveau.
-        Enfin, on remet des jetons pris chez le joueur parmi les jetons libres.
-        :return: Ne retourne rien.
+        Have the active player change his tockens.The method must ask the player to enter 
+        positions to change one after the other separated by a space.
+        If a position is invalid (use Joueur.position_est_valide) then ask again.
+        As soon as all valid positions remove them from the player's bridge and give him again.
+        Finally, tockens are given at the player's place among the free tockens.
+        :return: Do not return anything.
         """
 
         liste_jetons_retires = []
-        # On crée une liste de jetons tirés, nombre égale à la liste des positions entrées
+        # A list of drawn tokens is created, a number equal to the list of entered positions.
         liste_jetons_tires = self.tirer_jetons(len(pos_chevalet))
 
-        # retire le jeton,(position à None dans le chevalet) on ajoute ce jeton à la liste des jetons retiré
-        # on ajoute au chevalet le premier élément de la liste de jetons tirés et on retire ce jeton de cette liste
+        # Remove the token, (None position in the bridge) add this token to the removed token list. 
+        # The first element of the list of tokens drawn is added to the bridge and this token is 
+        # removed from this list.
         for i in pos_chevalet:
             liste_jetons_retires.append(self.joueur_actif.retirer_jeton(i))
             self.joueur_actif.ajouter_jeton(liste_jetons_tires[0])
             liste_jetons_tires = liste_jetons_tires[1:]
 
-        # On retourne les jetons retirés dans la liste des jetons libres
+        # We return the removed tokens in the list of free tokens
         self.jetons_libres = self.jetons_libres + liste_jetons_retires
 
+                                
     def jouer(self):
         """
-        Cette fonction permet de jouer la partie.
-        Tant que la partie n'est pas terminée, on joue un tour.
-        À chaque tour :
-            - On change le joueur actif et on lui affiche que c'est son tour. ex: Tour du joueur 2.
-            - On lui affiche ses options pour qu'il choisisse quoi faire:
-                "Entrez (j) pour jouer, (p) pour passer votre tour, (c) pour changer certains jetons,
-                (s) pour sauvegarder ou (q) pour quitter"
-            Notez que si le joueur fait juste sauvegarder on ne doit pas passer au joueur suivant mais dans tous
-             les autres cas on doit passer au joueur suivant. S'il quitte la partie on l'enlève de la liste des joueurs.
-        Une fois la partie terminée, on félicite le joueur gagnant!
-
-        :return Ne retourne rien.
+        This function allows you to play the game.
+        As long as the game is not over, we play a trick.
+        At each turn:
+            - We change the active player and we show him it's his turn. eg Player 2's turn.
+            - We show him his options so that he chooses what to do:
+              "Enter (j) to play, (p) to pass your turn, (c) to change some chips, (s) to save or (q) to quit"
+            Note that if the player just saves you must not move to the next player but in all other cases 
+            you must move to the next player. If he leaves the game, he is removed from the list of players.
+        Once the game is over, congratulate the winning player!
+        :return Do not return anything!
         """
+                                
         abandon = False
         changer_joueur = False
-
         while not self.partie_terminee() and not abandon:
-
             if partie_a_charger == "":
                 self.joueur_suivant()
-                messagebox.showinfo(title="C'est le hasard qui décide...",
-                                    message="Le premier joueur sera: {}.".format(self.joueur_actif.nom))
+                messagebox.showinfo(title="It's chance that decides...", message="The first player will be: {}.".format(self.joueur_actif.nom))
             self.plateau.dessiner_plateau()
             self.wait_window()  # Prevent clicking root while messagebox is open
 
+                                
     @staticmethod
     def charger_partie(nom_fichier):
-        """ *** Vous n'avez pas à coder cette méthode ***
-        Méthode statique permettant de créer un objet scrabble en lisant le fichier dans
-        lequel l'objet avait été sauvegardé précédemment. Pensez à utiliser la fonction load du module pickle.
-        :param nom_fichier: Nom du fichier qui contient un objet scrabble.
-        :return: Scrabble, l'objet chargé en mémoire.
         """
+        Static method to create a scrabble object by reading the file in which the object was previously saved. 
+        Remember to use the load function of the pickle module.
+        :param nom_fichier: The name of the file that contains a scrabble object.
+        :return: Scrabble, the object loaded into memory.
+        """
+                                
         with open(nom_fichier, "rb") as f:
             objet = pickle.load(f)
         return objet
 
 
 def accueil_close():
-    if (messagebox.askyesno(title="Vous quittez si tôt ?", message="Voulez-vous vraiment quitter le jeu ?")):
+    if (messagebox.askyesno(title="Are you leaving so soon ?", message="Are you sure you want to leave the game ?")):
         exit()
 
 
@@ -1110,69 +1022,70 @@ def quitter():
 
 
 if __name__ == '__main__':
+                                
     quitter = False
     while quitter is False:
-        # fenêtre d'accueil avec questions de config: langue, nombre de joueurs et nom de chaque joueur
-        partie_a_charger = ""
+                                
+        # Home window with config questions: language, number of players and name of each player.
+        partie_a_charger = ""                     
         acceuil = Tk()
         acceuil.configure(bg="#445569")
         acceuil.geometry('1200x700+0+0')
         acceuil.title = ("Écran d'accueil")
         acceuil.protocol("WM_DELETE_WINDOW", accueil_close)
-
         fr_acceuil = Frame(acceuil, bg="#445569")
-        fr_acceuil.grid(row=0, column=0, sticky='NW')
+        fr_acceuil.grid(row=0, column=0, sticky='NW')                                
         premiere_frame = Frame(fr_acceuil, bg="#445569")
-        premiere_frame.grid(row=0, column=0, sticky='N')
+        premiere_frame.grid(row=0, column=0, sticky='N')                                
         image1 = PhotoImage(file="image_scrabble-ConvertImage.png")
         label_acc = Label(premiere_frame, image=image1, bg="#445569")
         label_acc.grid()
-
         autre_fr_acceuil = Frame(acceuil, bg="#445569")
-        autre_fr_acceuil.grid(row=0, column=1, sticky='NW')
+        autre_fr_acceuil.grid(row=0, column=1, sticky='NW')                              
         premiere_frame_autre = Frame(autre_fr_acceuil, bg="#445569")
-        premiere_frame_autre.grid(row=0, column=1, sticky='N')
+        premiere_frame_autre.grid(row=0, column=1, sticky='N')                             
         image2 = PhotoImage(file="regle_du_jeu-ConvertImage.png")
         label_image_jeu = Label(premiere_frame_autre, image=image2, bg="#445569")
         label_image_jeu.grid()
-
         deuxieme_frame_autre = Frame(autre_fr_acceuil, bg="#445569")
+                                
         label_texte_jeu = Label(deuxieme_frame_autre,
-                                text="Le jeu de Scrabble est un jeu de réflexion très populaire c'est "
-                                     "pourquoi nous vous le \nproposons dans 15 langues différentes."
-                                     "\n\nLe but du jeu est d’avoir le plus de points possible pour "
-                                     "battre son adversaire. Chaque \njoueur pioche 7 lettres dans le "
-                                     "sac (ici, le jeu vous les pioche au hasard) et doit former\nun "
-                                     "mot. \n\nSuivant les lettres qu'il utilise, le joueur aura un "
-                                     "certain nombre de points. Si en plus\nde ça, il pose son mot "
-                                     "sur une case spéciale du plateau, ses points vont augmenter."
-                                     "\n\nLes différentes valeurs des cases spéciales du plateau :"
-                                     "\n- Case bleu ciel :  Lettre compte double\n- Case bleu foncé :  "
-                                     "Lettre compte triple"
-                                     "\n- Case rose :  Mot compte double\n- Case rouge :  Mot compte triple"
+                                text="The game of Scrabble is a very popular puzzle game that's why we put it to you\n" 
+                                     "in 15 different languages.\n"
+                                     "\nThe goal of the game is to have as many points as possible to beat his opponent.\n"
+                                     "\nEach player draws 7 letters in the bag (here, the game draws them at random) and\n"
+                                     "must form a word.\n"
+                                     "\nDepending on the letters he uses, the player will have a certain number of points.\n"
+                                     "If on top of that, he puts his word on a special box of the board, his points will\n"
+                                     "increase.\n"
+                                     "The different values of the special boxes on the board:\n"
+                                     "- Sky Blue Case: Double Count Letter\n"
+                                     "- Dark blue case: Letter count triple\n"
+                                     "- Pink Case: Word Count Double\n"
+                                     "- Red box: Word count triple"
                                 , justify='left', foreground='white', font=("Impact", 13), bg="#445569")
         label_texte_jeu.grid()
+                                
         deuxieme_frame_autre.grid(row=1, column=1, sticky='NW')
-        # text="Le jeu de Scrabble est un jeu de réflexion très populaire\nc'est pourquoi nous vous le proposons dans 15 langues différentes. \nLe but du jeu est d’avoir le plus de points possible pour battre son adversaire. \nChaque joueur pioche 7 lettres dans le sac (ici, le jeu vous les pioche au hasard) \net doit former un mot. Suivant les lettres qu'il utilise, le joueur aura un certain nombre de points. \nSi en plus de ça, il pose son mot sur une case spéciale du plateau, ses points vont augmenter.")
-
+        # text="The game of Scrabble is a very popular puzzle game that's why we offer it in 15 different languages."
+        #       "The goal of the game is to have as many points as possible to beat his opponent.\n"
+        #       "Each player draws 7 letters in the bag (here, the game draws them at random) and must form a word.\n" 
+        #       "Depending on the letters he uses, the player will have a certain number of points.\n"
+        #       "If on top of that, he puts his word on a special box of the board, his points will increase.")"
         deuxieme_frame = Frame(fr_acceuil, bg="#445569")
         deuxieme_frame.grid(row=1, column=0, sticky='N')
+                                
         fr_choix = Frame(deuxieme_frame, bg="#445569")
-        Label(fr_choix,
-              text="Bienvenue / Welcome\n Veuillez choisir le nombre de joueurs ainsi que la langue de jeu.\n",
-              bg="#445569", font=("Impact", 15), foreground='white').grid()
+        Label(fr_choix,text="Welcome / Bienvenue\n Please choose the number of players and the language of play.\n", bg="#445569", font=("Impact", 15), foreground='white').grid()
         fr_choix.grid(row=1, column=0, sticky='N')
         fr_nb_joueurs = Frame(deuxieme_frame, bg="#445569")
         nb_joueurs = 2
-
+                                
         var = IntVar()
         var.set(4)
-        Radiobutton(fr_nb_joueurs, text="2 joueurs", variable=var, value=2, padx=15, font=("Impact", 15),
-                    foreground="#445569", bg="white").grid(row=0, column=0)
-        Radiobutton(fr_nb_joueurs, text="3 joueurs", variable=var, value=3, padx=15, font=("Impact", 15),
-                    foreground="#445569", bg="white").grid(row=0, column=1)
-        Radiobutton(fr_nb_joueurs, text="4 joueurs", variable=var, value=4, padx=15, font=("Impact", 15),
-                    foreground="#445569", bg="white").grid(row=0, column=2)
+        Radiobutton(fr_nb_joueurs, text="2 joueurs", variable=var, value=2, padx=15, font=("Impact", 15),foreground="#445569", bg="white").grid(row=0, column=0)
+        Radiobutton(fr_nb_joueurs, text="3 joueurs", variable=var, value=3, padx=15, font=("Impact", 15),foreground="#445569", bg="white").grid(row=0, column=1)
+        Radiobutton(fr_nb_joueurs, text="4 joueurs", variable=var, value=4, padx=15, font=("Impact", 15),foreground="#445569", bg="white").grid(row=0, column=2)
         fr_nb_joueurs.grid()
         nb_joueurs = var.get()
 
@@ -1181,15 +1094,13 @@ if __name__ == '__main__':
         global index_code_langue
         global langue
         langue_selectionnee = StringVar()
-        liste_langues = (' Français', ' Anglais', ' Bulgare', ' Croate', ' Danois', ' Espagnol', ' Estonien', ' Grec',
-                         ' Hongrois', ' Islandais', ' Italien', ' Latin', ' Néerlandais', ' Norvégien', ' Portugais')  # modifié
+        liste_langues = (' French', ' English', ' Bulgarian', ' Croatian', ' Danish', ' Spanish', ' Estonian', ' Greek',
+                         ' Hungarian', ' Icelandic', ' Italian', ' Latin', ' Dutch', ' Norwegian', ' Portuguese')  # edit
         liste_codes_langues = ('FR', 'AN', 'BU', 'CR', 'DA', 'ES', 'ET', 'GR', 'HO', 'IS','IT', 'LA', 'NE', 'NO','PO')
-        langue_choisie = Combobox(fr_langue, textvariable=var_lang, values=liste_langues, state='readonly',
-                                  font=("Impact", 15), height=15, foreground="#445569")
+        langue_choisie = Combobox(fr_langue, textvariable=var_lang, values=liste_langues, state='readonly',font=("Impact", 15), height=15, foreground="#445569")
         langue_choisie.current(newindex=0)
         Label(fr_langue, text="\n", bg="#445569").grid()
-        Label(fr_langue, text="Nous désirons jouer en :  ", foreground='white', font=("Impact", 15), bg="#445569").grid(
-            row=1, column=0)
+        Label(fr_langue, text="We want to play: ", foreground='white', font=("Impact", 15), bg="#445569").grid(row=1, column=0)
         langue_choisie.grid(row=1, column=1)
         index_code_langue = langue_choisie.current()
         Label(fr_langue, text="\n", bg="#445569").grid()
@@ -1197,19 +1108,15 @@ if __name__ == '__main__':
 
         # bouton valider
         fr_valide = Frame(deuxieme_frame, pady=10, bg="#445569")
-        charger = Button(fr_valide, text="Charger une partie existante", command=bouton_charger_partie, padx=10,
-                         font=("Impact", 15), bg='white', foreground="#445569")
+        charger = Button(fr_valide, text="Load an existing part", command=bouton_charger_partie, padx=10,font=("Impact", 15), bg='white', foreground="#445569")
         charger.grid(row=0, column=0)
-        valide = Button(fr_valide, text="Commencer une nouvelle partie!", command=bouton_accueil_commencer, padx=10,
-                        font=("Impact", 15), bg='white', foreground="#445569")
+        valide = Button(fr_valide, text="Start a new game !", command=bouton_accueil_commencer, padx=10,font=("Impact", 15), bg='white', foreground="#445569")
         valide.grid(row=0, column=1)
         fr_valide.grid()
 
         acceuil.mainloop()
-
         nb_joueurs = var.get()
         langue = var_lang.get()
-
         index_code_langue = liste_langues.index(langue)
         langue = ('FR', 'AN', 'BU', 'CR', 'DA', 'ES', 'ET', 'GR', 'HO', 'IS', 'IT', 'LA', 'NE', 'NO','PO')[index_code_langue]
         gui = Scrabble(nb_joueurs, langue)
