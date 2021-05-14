@@ -99,7 +99,7 @@ class Scrabble(Tk):
                     ('P', 2, 3), ('F', 2, 4), ('H', 2, 4), ('V', 2, 4), ('J', 1, 8),
                     ('Q', 1, 8), ('K', 1, 10), ('W', 1, 10), ('X', 1, 10), ('Y', 1, 10),
                     ('Z', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_francais.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_francais.txt'
             
         # DICTIONAIRE ANGLAIS
         elif self.langue.upper() == 'AN':
@@ -110,7 +110,7 @@ class Scrabble(Tk):
                     ('P', 2, 3), ('F', 2, 4), ('H', 2, 4), ('V', 2, 4), ('J', 1, 8),
                     ('Q', 1, 10), ('K', 1, 5), ('W', 2, 4), ('X', 1, 8), ('Y', 2, 4),
                     ('Z', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_anglais.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_anglais.txt'
             
         # DICTIONAIRE ESPAGNOL
         elif self.langue.upper() == 'ES':
@@ -121,7 +121,7 @@ class Scrabble(Tk):
                     ('P', 2, 3), ('H', 2, 4), ('F', 1, 4), ('V', 1, 4), ('Y', 1, 4),
                     ('CH', 1, 5), ('Q', 1, 5), ('J', 1, 8), ('LL', 1, 8), ('Ñ', 1, 8),
                     ('RR', 1, 8), ('X', 1, 8), ('Z', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_espagnol.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_espagnol.txt'
             
         # DICTIONAIRE ITALIEN
         elif self.langue.upper() == 'IT':
@@ -131,7 +131,7 @@ class Scrabble(Tk):
                     ('N', 5, 3), ('U', 5, 3), ('B', 3, 5), ('D', 3, 5), ('F', 3, 5),
                     ('P', 3, 5), ('V', 3, 5), ('G', 2, 8), ('H', 2, 8), ('Z', 2, 8),
                     ('Q', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_italien.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_italien.txt'
             
         # DICTIONAIRE NORVEGIEN
         elif self.langue.upper() == 'NO':
@@ -142,7 +142,7 @@ class Scrabble(Tk):
                     ('B', 3, 4), ('U', 3, 4), ('V', 3, 4), ('J', 2, 4), ('P', 2, 4),
                     ('Å', 2, 4), ('Ø', 2, 5), ('Y', 1, 6), ('Æ', 1, 6), ('W', 1, 8),
                     ('C', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_norvegien.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_norvegien.txt'
             
         # DICTIONAIRE NÉERLANDAIS
         elif self.langue.upper() == 'NE':
@@ -153,7 +153,7 @@ class Scrabble(Tk):
                     ('U', 3, 4), ('H', 2, 4), ('J', 2, 4), ('V', 2, 4), ('Z', 2, 4),
                     ('IJ', 2, 4), ('F', 1, 4), ('C', 2, 5), ('W', 2, 5), ('X', 1, 8),
                     ('Y', 1, 8), ('Q', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_neerlandais.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_neerlandais.txt'
             
         # DICTIONAIRE DANOIS
         elif self.langue.upper() == 'DA':
@@ -164,7 +164,7 @@ class Scrabble(Tk):
                     ('U', 3, 3), ('V', 3, 3), ('H', 2, 4), ('J', 2, 4), ('P', 2, 4),
                     ('Y', 2, 4), ('Æ', 2, 4), ('Ø', 2, 4), ('Å', 2, 4), ('C', 2, 8),
                     ('X', 1, 8), ('Z', 1, 8)]
-            nom_fichier_dictionnaire = 'dictionnaire_danois.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_danois.txt'
         # DICTIONNAIRE BULGARE
         elif self.langue.upper() == 'BU':
             # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
@@ -174,7 +174,7 @@ class Scrabble(Tk):
                     ('Г', 3, 3), ('Ъ', 2, 3), ('Ж', 2, 4), ('З', 2, 4), ('У', 3, 5),
                     ('Ч', 2, 5), ('Я', 2, 5), ('Й', 1, 5), ('X', 1, 5), ('Ц', 1, 8),
                     ('Ш', 1, 8), ('Ю', 1, 8), ('Ф', 1, 10), ('Щ', 1, 10), ('Ь', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_bulgare.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_bulgare.txt'
             
         # DICTIONNAIRE ESTONIEN
         elif self.langue.upper() == 'ET':
@@ -185,7 +185,7 @@ class Scrabble(Tk):
                     ('B', 1, 4), ('H', 2, 4), ('J', 2, 4), ('Õ', 2, 4), ('P', 2, 4),
                     ('Ä', 2, 5), (' Ü', 2, 5), ('Ö', 2, 6), ('F', 1, 8), ('Š', 1, 10),
                     ('Z', 1, 10), ('Ž', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_estonien.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_estonien.txt'
         # DICTIONNAIRE GREC
         elif self.langue.upper() == 'GR':
             # Infos disponibles sur https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
@@ -194,7 +194,7 @@ class Scrabble(Tk):
                     ('P', 5, 2), ('Y', 4, 2), ('Λ', 3, 3), ('M', 3, 3), ('Ω', 3, 3),
                     ('Γ', 2, 4), ('Δ', 2, 4), ('B', 1, 8), ('Φ', 1, 8), ('X', 1, 8),
                     ('Z', 1, 10), ('Θ', 1, 10), ('Ξ', 1, 10), ('Ψ', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_grec.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_grec.txt'
             
         # DICTIONNAIRE CROATE
         elif self.langue.upper() == 'CR':
@@ -205,7 +205,7 @@ class Scrabble(Tk):
                     ('G', 2, 3), ('L', 2, 3), ('Z', 2, 3), ('B', 1, 3), ('Č', 1, 3),
                     ('C', 1, 4), ('H', 1, 4), ('LJ', 1, 4), ('NJ', 1, 4), ('Š', 1, 4),
                     ('Ž', 1, 4), ('Ć', 1, 5), ('F', 1, 8), ('DŽ', 1, 10), ('Đ', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_croate.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_croate.txt'
             
         # DICTIONNAIRE HONGROIS
         elif self.langue.upper() == 'HO':
@@ -218,7 +218,7 @@ class Scrabble(Tk):
                     ('U', 2, 4), ('Ü', 2, 4), ('Z', 2, 4), ('C', 1, 5), ('Í', 1, 5),
                     ('NY', 1, 5), ('CS', 1, 7), ('Ő', 1, 7), ('Ú', 1, 7), ('Ű', 1, 7),
                     ('LY', 1, 8), ('ZS', 1, 8), ('TY', 1, 10), ]
-            nom_fichier_dictionnaire = 'dictionnaire_hongrois.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_hongrois.txt'
             
         # DICTIONNAIRE LATIN
         elif self.langue.upper() == 'LA':
@@ -227,7 +227,7 @@ class Scrabble(Tk):
                     ('T', 8, 1), ('R', 7, 1), ('O', 5, 1), ('C', 4, 2), ('M', 4, 2),
                     ('N', 4, 2), ('D', 3, 2), ('L', 3, 2), ('Q', 3, 3), ('B', 2, 4),
                     ('G', 2, 4), ('P', 2, 4), ('X', 2, 4), ('F', 1, 8), ('H', 1, 8)]
-            nom_fichier_dictionnaire = 'dictionnaire_latin.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_latin.txt'
             
         # DICTIONNAIRE ISLANDAIS
         elif self.langue.upper() == 'IS':
@@ -239,7 +239,7 @@ class Scrabble(Tk):
                     ('Þ', 1, 4), ('J', 1, 5), ('Æ', 1, 5), ('B', 1, 6), ('É ', 1, 6),
                     ('Ó', 1, 6), ('Ö ', 1, 7), ('Y', 1, 7), ('P', 1, 8), ('Ú ', 1, 8),
                     ('Ý', 1, 9), ('X', 1, 10)]
-            nom_fichier_dictionnaire = 'dictionnaire_islandais.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_islandais.txt'
         # DICTIONAIRE PORTUGAIS ok
         elif langue.upper() == 'PO':
             # Information available on https://fr.wikipedia.org/wiki/Lettres_du_Scrabble
@@ -248,7 +248,7 @@ class Scrabble(Tk):
                     ('P', 4, 2), ('D', 5, 2), ('L', 5, 2), ('N', 4, 3), ('B', 3, 3),
                     ('Ç', 2, 3), ('F', 2, 4), ('G', 2, 4), ('H', 2, 4), ('V', 2, 4),
                     ('J', 2, 5), ('Q', 1, 6), ('X', 1, 8), ('Z', 1, 8)]
-            nom_fichier_dictionnaire = 'dictionnaire_portugais.txt'
+            nom_fichier_dictionnaire = '../Dictionnaire/dictionnaire_portugais.txt'
 
         if partie_a_charger == "":
             self.jetons_libres = [Jeton(lettre, valeur) for lettre, occurences, valeur in data for i in range(occurences)]
@@ -277,7 +277,7 @@ class Scrabble(Tk):
 
             image_equipe = Frame(self.form_joueurs,  bg = "#445569")
             image_equipe.grid(row=1, column=0)
-            image3 = PhotoImage(file= "equipe.png")
+            image3 = PhotoImage(file= "../Images/equipe.png")
             label_image_equipe = Label(image_equipe, image = image3,  bg = "#445569")
             label_image_equipe.grid()
 
@@ -473,7 +473,9 @@ class Scrabble(Tk):
             with open(nom_fichier, "wb") as f:
                 pickle.dump(partie, f)
             valide = True
-            messagebox.showinfo(title="Saved game message="The game is saved.")
+            messagebox.showinfo(
+                title="The game is saved"
+            )
 
                                 
     def dessiner_joueurs(self):                               
@@ -492,7 +494,7 @@ class Scrabble(Tk):
 
         # Frame in Players with Player 1:
         if self.joueurs[0].a_abandonne is True:
-            self.abandonne1 = PhotoImage(file='abandonne.png')
+            self.abandonne1 = PhotoImage(file='../Images/abandonne.png')
             self.abandonne1_label1 = Label(chevalet1, image=self.abandonne1, bg='#FDF4C9')
             self.abandonne1_label1.grid(row=1, column=0, sticky=NSEW)
         else:
@@ -526,7 +528,7 @@ class Scrabble(Tk):
         chevalet2.grid(row=4, column=0)
 
         if self.joueurs[1].a_abandonne is True:
-            self.abandonne2 = PhotoImage(file='abandonne.png')
+            self.abandonne2 = PhotoImage(file='../Images/abandonne.png')
             self.abandonne2_label1 = Label(chevalet2, image=self.abandonne2, bg='#FDF4C9')
             self.abandonne2_label1.grid(row=1, column=0, sticky=NSEW)
         else:
@@ -561,7 +563,7 @@ class Scrabble(Tk):
             chevalet3.grid(row=4, column=0)
 
             if self.joueurs[2].a_abandonne is True:
-                self.abandonne3 = PhotoImage(file='abandonne.png')
+                self.abandonne3 = PhotoImage(file='../Images/abandonne.png')
                 self.abandonne3_label1 = Label(chevalet3, image=self.abandonne3, bg='#FDF4C9')
                 self.abandonne3_label1.grid(row=1, column=0, sticky=NSEW)
             else:
@@ -596,7 +598,7 @@ class Scrabble(Tk):
             chevalet4.grid(row=4, column=0)
 
             if self.joueurs[3].a_abandonne is True:
-                self.abandonne4 = PhotoImage(file='abandonne.png')
+                self.abandonne4 = PhotoImage(file='../Images/abandonne.png')
                 self.abandonne4_label1 = Label(chevalet4, image=self.abandonne4, bg='#FDF4C9')
                 self.abandonne4_label1.grid(row=1, column=0, sticky=NSEW)
             else:
@@ -765,8 +767,8 @@ class Scrabble(Tk):
             self.form_changer_lettres.title("Exchange the letters")
             self.form_changer_lettres.configure(bg="#445569")
             fr_intro = Frame(self.form_changer_lettres)
-            fr_intro.grid(row=0, column=0)                               
-            label_intro = Label(fr_intro, text="Please select in blue the letters you wish to exchange then press OK.\n\n Your letters will be changed, but you will lose your turn padx=50, pady=20, foreground='white', bg='#445569', font=("Helvetica", 20) )
+            fr_intro.grid(row=0, column=0)  
+            label_intro = Label(fr_intro, text="Please select in blue the letters you wish to exchange then press OK.\n\n Your letters will be changed, but you will lose your turn", padx=50, pady=20, foreground='white', bg='#445569', font=("Helvetica", 20))                             
             label_intro.grid(row=0, column=0)
             fr_chevalet = Frame(self.form_changer_lettres)
             fr_chevalet.grid(row=1, column=0)
@@ -1037,14 +1039,14 @@ if __name__ == '__main__':
         fr_acceuil.grid(row=0, column=0, sticky='NW')                                
         premiere_frame = Frame(fr_acceuil, bg="#445569")
         premiere_frame.grid(row=0, column=0, sticky='N')                                
-        image1 = PhotoImage(file="image_scrabble-ConvertImage.png")
+        image1 = PhotoImage(file="../Images/image_scrabble-ConvertImage.png")
         label_acc = Label(premiere_frame, image=image1, bg="#445569")
         label_acc.grid()
         autre_fr_acceuil = Frame(acceuil, bg="#445569")
         autre_fr_acceuil.grid(row=0, column=1, sticky='NW')                              
         premiere_frame_autre = Frame(autre_fr_acceuil, bg="#445569")
         premiere_frame_autre.grid(row=0, column=1, sticky='N')                             
-        image2 = PhotoImage(file="regle_du_jeu-ConvertImage.png")
+        image2 = PhotoImage(file="../Images/regle_du_jeu-ConvertImage.png")
         label_image_jeu = Label(premiere_frame_autre, image=image2, bg="#445569")
         label_image_jeu.grid()
         deuxieme_frame_autre = Frame(autre_fr_acceuil, bg="#445569")
